@@ -1,0 +1,151 @@
+import httpx
+
+from app.config import DEEPSEEK_URL, deepseek_key
+
+class ModelDown(Exception):
+    pass
+
+
+_EVENT_RULES = (
+    "Блок «Событие». Достаточно: факт отделён от интерпретации, изменение названо "
+    "(правила, технология, поведение, цена или доступ). "
+    "Слабо: пересказ заголовка или сразу идея продукта / «сделаем приложение»."
+)
+
+_SCALE_RULES = (
+    "Блок «Масштаб». Достаточно: группы названы по имени (не «все»), есть место/отрасль "
+    "и срок или обратимость. "
+    "Слабо: «все», «рынок», «всегда» без места и срока."
+)
+
+
+def _post(payload: dict) -> dict:
+    try:
+        response = httpx.post(
+            DEEPSEEK_URL,
+            headers={"Authorization": f"Bearer {deepseek_key()}"},
+            json=payload,
+            timeout=40.0,
+        )
+        response.raise_for_status()
+        return response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise ModelDown from exc
+
+
+def complete(messages: list[dict]) -> tuple[str, str | None]:
+    payload = {
+        "model": "deepseek-chat",
+        "messages": messages,
+        "temperature": 0.2,
+    }
+    try:
+        body = _post(payload)
+    except ModelDown:
+        body = _post(payload)
+    try:
+        content = body["choices"][0]["message"]["content"].strip()
+    except (KeyError, IndexError, AttributeError, TypeError) as exc:
+        raise ModelDown from exc
+    returned = body.get("model")
+    if not isinstance(returned, str) or not returned.strip():
+        returned = None
+    return content, returned
+
+
+def parse_judge_reply(text: str) -> tuple[bool, str]:
+    """Parse ДОСТАТОЧНО / НЕХВАТАЕТ from model reply."""
+    lines = [line.strip() for line in (text or "").splitlines() if line.strip()]
+    enough = None
+    missing = ""
+    for line in lines:
+        upper = line.upper()
+        if upper.startswith("ДОСТАТОЧНО:"):
+            value = line.split(":", 1)[1].strip().lower()
+            enough = value in ("да", "yes", "true", "1", "+")
+        elif upper.startswith("НЕХВАТАЕТ:"):
+            missing = line.split(":", 1)[1].strip()
+    if enough is None:
+        raise ModelDown
+    if enough:
+        return True, ""
+    if not missing:
+        missing = "Ответ слабый. Уточни по правилам блока."
+    return False, missing
+
+
+def judge_block(block: str, topic: str, answer: str) -> tuple[bool, str, str | None]:
+    """Evaluate answer with DeepSeek against smoke rules. block: event|scale."""
+    rules = _EVENT_RULES if block == "event" else _SCALE_RULES
+    text, returned = complete(
+        [
+            {
+                "role": "system",
+                "content": (
+                    "Ты оцениваешь ответ человека в коротком упражнении. "
+                    "Не выдумывай факты. Не предлагай продукт. "
+                    "Ответь ровно двумя строками:\n"
+                    "ДОСТАТОЧНО: да\n"
+                    "или\n"
+                    "ДОСТАТОЧНО: нет\n"
+                    "НЕХВАТАЕТ: одно короткое предложение, чего не хватает "
+                    "(только если ДОСТАТОЧНО: нет).\n"
+                    f"Правила блока:\n{rules}"
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Формулировка темы: {topic}\n"
+                    f"Ответ человека: {answer}"
+                ),
+            },
+        ]
+    )
+    ok, missing = parse_judge_reply(text)
+    return ok, missing, returned
+
+
+def finale(topic: str, event_answer: str, scale_answer: str) -> tuple[str, str, str, str, str | None]:
+    text, returned = complete(
+        [
+            {
+                "role": "system",
+                "content": (
+                    "Ты ведёшь короткую тестовую сессию. Не выдумывай факты сверх слов человека. "
+                    "Не предлагай новый продукт. Ответь ровно тремя абзацами с метками "
+                    "ПОЛУЧИЛОСЬ:, СЛАБО:, ПРОПУЩЕНО:. "
+                    "В ПРОПУЩЕНО одна фраза: в полной тренировке дальше были бы потери/выигрыш, "
+                    "потребности, варианты и фильтр; сейчас сессия тестовая и на этом останавливается."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Формулировка: {topic}\n"
+                    f"Событие: {event_answer}\n"
+                    f"Масштаб: {scale_answer}"
+                ),
+            },
+        ]
+    )
+    worked = _section(text, "ПОЛУЧИЛОСЬ:", "СЛАБО:")
+    weak = _section(text, "СЛАБО:", "ПРОПУЩЕНО:")
+    missed = _section(text, "ПРОПУЩЕНО:", None)
+    if not worked or not weak or not missed:
+        raise ModelDown
+    return text, worked, weak, missed, returned
+
+
+def _section(text: str, start: str, end: str | None) -> str:
+    low = text
+    begin = low.find(start)
+    if begin < 0:
+        return ""
+    begin += len(start)
+    if end is None:
+        return low[begin:].strip()
+    stop = low.find(end, begin)
+    if stop < 0:
+        return low[begin:].strip()
+    return low[begin:stop].strip()
