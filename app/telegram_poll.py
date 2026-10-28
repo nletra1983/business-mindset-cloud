@@ -4,11 +4,17 @@ import time
 import httpx
 
 from app.account_settings import (
+    PROFILE_FACT_PROMPT,
+    PROFILE_FACT_RETRY,
+    PROFILE_STRENGTHS_RETRY,
+    PROFILE_WEAKNESSES_PROMPT,
+    PROFILE_WEAKNESSES_RETRY,
     SETTINGS_CALLBACK,
     SETTINGS_MODEL_CALLBACK,
     SETTINGS_PREFIX,
     SETTINGS_PROFILE_CALLBACK,
-    profile_entry_action,
+    profile_saved_actions,
+    profile_start_actions,
     recoverable_action,
     settings_menu_action,
 )
@@ -22,7 +28,21 @@ from app.model_switch import (
     is_model_id,
     model_keyboard,
 )
-from app.person import read_model_state, upsert_from_telegram, write_model_state, write_open_run_model
+from app.person import (
+    PROFILE_AWAITING_EXTRA_FACT,
+    PROFILE_AWAITING_STRENGTHS,
+    PROFILE_AWAITING_WEAKNESSES,
+    append_visible_fact,
+    read_model_state,
+    read_profile_edit_step,
+    read_visible_profile,
+    upsert_from_telegram,
+    write_model_state,
+    write_open_run_model,
+    write_profile_edit_step,
+    write_visible_strengths,
+    write_visible_weaknesses,
+)
 from app.run_flow import handle_text, open_window
 from app.run_list import exit_keyboard, exit_row, resume, show_list
 
@@ -65,6 +85,10 @@ def _dispatch(conn, update: dict) -> None:
             return
         _typing(message["chat"]["id"])
         person = upsert_from_telegram(conn, int(user["id"]), user.get("username"))
+        profile_actions = _profile_message_actions(conn, person["id"], message["text"])
+        if profile_actions is not None:
+            _perform(message["chat"]["id"], profile_actions, _current_model(conn, person["id"]))
+            return
         actions = handle_text(
             conn,
             person,
@@ -110,10 +134,57 @@ def _settings_actions(conn, person_id, data: str) -> list[dict]:
         state = read_model_state(conn, person_id)
         return [{"kind": "models", "text": PICK_TEXT, "current": state["current_model"]}]
     if data == SETTINGS_PROFILE_CALLBACK:
-        return [profile_entry_action()]
+        profile = read_visible_profile(conn, person_id)
+        write_profile_edit_step(conn, person_id, PROFILE_AWAITING_STRENGTHS)
+        conn.commit()
+        return profile_start_actions(profile)
     if data.startswith(SETTINGS_PREFIX):
         return [recoverable_action()]
     return []
+
+
+def _profile_message_actions(conn, person_id, text: str) -> list[dict] | None:
+    step = read_profile_edit_step(conn, person_id)
+    if step == "idle":
+        return None
+
+    value = text.strip()
+    if step == PROFILE_AWAITING_STRENGTHS:
+        if not value:
+            return [{"kind": "text", "text": PROFILE_STRENGTHS_RETRY}]
+        write_visible_strengths(conn, person_id, value)
+        write_profile_edit_step(conn, person_id, PROFILE_AWAITING_WEAKNESSES)
+        conn.commit()
+        return [
+            {"kind": "text", "text": "Сильные стороны сохранены."},
+            {"kind": "text", "text": PROFILE_WEAKNESSES_PROMPT},
+        ]
+
+    if step == PROFILE_AWAITING_WEAKNESSES:
+        if not value:
+            return [{"kind": "text", "text": PROFILE_WEAKNESSES_RETRY}]
+        write_visible_weaknesses(conn, person_id, value)
+        write_profile_edit_step(conn, person_id, PROFILE_AWAITING_EXTRA_FACT)
+        conn.commit()
+        return [
+            {"kind": "text", "text": "Слабые стороны сохранены."},
+            {"kind": "text", "text": PROFILE_FACT_PROMPT},
+        ]
+
+    if step == PROFILE_AWAITING_EXTRA_FACT:
+        if not value:
+            return [{"kind": "text", "text": PROFILE_FACT_RETRY}]
+        fact_added = value.lower() not in {"нет", "no", "skip", "-"}
+        if fact_added:
+            append_visible_fact(conn, person_id, value)
+        write_profile_edit_step(conn, person_id, "idle")
+        profile = read_visible_profile(conn, person_id)
+        conn.commit()
+        return profile_saved_actions(profile, fact_added)
+
+    write_profile_edit_step(conn, person_id, "idle")
+    conn.commit()
+    return [recoverable_action()]
 
 
 def _choose(conn, person_id, model_id: str) -> str:

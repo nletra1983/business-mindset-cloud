@@ -66,3 +66,20 @@ CREATE TABLE IF NOT EXISTS bot_kv (
     key text PRIMARY KEY,
     value text NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS visible_profile (
+    person_id uuid PRIMARY KEY REFERENCES person (id),
+    strengths_text text NOT NULL DEFAULT '',
+    weaknesses_text text NOT NULL DEFAULT '',
+    self_facts jsonb NOT NULL DEFAULT '[]'::jsonb,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS profile_edit_session (
+    person_id uuid PRIMARY KEY REFERENCES person (id),
+    step text NOT NULL DEFAULT 'idle',
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT profile_edit_session_step_check CHECK (
+        step IN ('idle', 'awaiting_strengths', 'awaiting_weaknesses', 'awaiting_extra_fact')
+    )
+);

@@ -1,4 +1,5 @@
 from app.account_settings import (
+    PROFILE_STRENGTHS_PROMPT,
     SETTINGS_CALLBACK,
     SETTINGS_MODEL_CALLBACK,
     SETTINGS_MODEL_LABEL,
@@ -9,6 +10,14 @@ from app.account_settings import (
     settings_menu_action,
 )
 from app.telegram_poll import _perform, _settings_actions
+
+
+class _Conn:
+    def __init__(self):
+        self.commits = 0
+
+    def commit(self):
+        self.commits += 1
 
 
 def test_settings_button_replaces_model_opener():
@@ -41,11 +50,28 @@ def test_settings_model_reuses_existing_model_flow(monkeypatch):
     assert actions == [{"kind": "models", "text": "Выбери модель.", "current": "glm-5.3-flash"}]
 
 
-def test_profile_callback_routes_to_profile_entry():
-    actions = _settings_actions(object(), "person-1", SETTINGS_PROFILE_CALLBACK)
-    assert len(actions) == 1
+def test_profile_callback_routes_to_profile_entry(monkeypatch):
+    conn = _Conn()
+    observed = {}
+
+    def remember_step(_conn, _person_id, step):
+        observed["step"] = step
+
+    profile = {
+        "strengths_text": "умею фокусироваться",
+        "weaknesses_text": "иногда тороплюсь",
+        "self_facts": ["веду канал"],
+    }
+    monkeypatch.setattr("app.telegram_poll.read_visible_profile", lambda _conn, _pid: profile)
+    monkeypatch.setattr("app.telegram_poll.write_profile_edit_step", remember_step)
+    actions = _settings_actions(conn, "person-1", SETTINGS_PROFILE_CALLBACK)
+
+    assert observed["step"] == "awaiting_strengths"
+    assert conn.commits == 1
+    assert len(actions) == 2
     assert actions[0]["kind"] == "text"
-    assert "информация о себе" in actions[0]["text"].lower()
+    assert "сильные стороны" in actions[0]["text"].lower()
+    assert actions[1] == {"kind": "text", "text": PROFILE_STRENGTHS_PROMPT}
 
 
 def test_list_render_keeps_settings_button(monkeypatch):
