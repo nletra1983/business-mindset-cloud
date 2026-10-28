@@ -29,13 +29,13 @@
 
 Папка: `features/account-settings/`  
 Бизнес-логика: `features/account-settings/business-logic.md`  
-Статус фичи: `ready-for-speckit`
+Статус фичи: `in-impl`
 
 | История | Спека | Статус |
 |---|---|---|
 | Выбрать модель | `specs/002-telegram-model-switch/` | in-impl |
-| Открыть настройки с клавиатуры разбора | `ProductArtifacts/skill-profile-slice.md` | ready-for-speckit |
-| Прочитать, изменить и добавить информацию о себе | `ProductArtifacts/skill-profile-slice.md` | ready-for-speckit |
+| Открыть настройки с клавиатуры разбора | `specs/003-open-settings-from-keyboard/` | done |
+| Прочитать, изменить и добавить информацию о себе | `specs/004-self-info-profile/` | specified |
 | Обновлять скрытый файл профиля по результату задания | `ProductArtifacts/skill-profile-slice.md` | ready-for-speckit |
 
 Истории без папки `specs/` ещё не прошли `/speckit-specify`. Их общая граница — `ProductArtifacts/skill-profile-slice.md`.
