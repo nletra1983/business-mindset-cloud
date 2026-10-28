@@ -6,6 +6,7 @@ from app.config import (
     DEEPSEEK_URL,
     GIGACHAT_OAUTH_URL,
     GIGACHAT_SCOPE,
+    GIGACHAT_STT_URL,
     GIGACHAT_URL,
     GLM_URL,
     deepseek_key,
@@ -14,6 +15,10 @@ from app.config import (
 )
 
 class ModelDown(Exception):
+    pass
+
+
+class VoiceNotSupported(Exception):
     pass
 
 
@@ -54,6 +59,48 @@ def _once(model_id: str, messages: list[dict]) -> tuple[str, str | None]:
     except RuntimeError as exc:
         raise ModelDown from exc
     return _content(body)
+
+
+def transcribe_voice(
+    model_id: str,
+    voice_bytes: bytes,
+    *,
+    file_name: str = "voice.ogg",
+    mime_type: str = "audio/ogg",
+) -> str:
+    error: ModelDown | None = None
+    for _ in range(2):
+        try:
+            return _transcribe_once(model_id, voice_bytes, file_name=file_name, mime_type=mime_type)
+        except ModelDown as exc:
+            error = exc
+    assert error is not None
+    raise error
+
+
+def _transcribe_once(
+    model_id: str,
+    voice_bytes: bytes,
+    *,
+    file_name: str,
+    mime_type: str,
+) -> str:
+    if model_id != "GigaChat-2":
+        raise VoiceNotSupported
+    token = _gigachat_token()
+    try:
+        response = httpx.post(
+            GIGACHAT_STT_URL,
+            headers={"Authorization": f"Bearer {token}"},
+            files={"file": (file_name, voice_bytes, mime_type)},
+            data={"model": model_id},
+            timeout=40.0,
+        )
+        response.raise_for_status()
+        body = response.json()
+    except (httpx.HTTPError, ValueError, RuntimeError) as exc:
+        raise ModelDown from exc
+    return _voice_text(body)
 
 
 def _gigachat_token() -> str:
@@ -99,3 +146,31 @@ def _content(body: dict) -> tuple[str, str | None]:
     if not isinstance(returned, str) or not returned.strip():
         returned = None
     return content, returned
+
+
+def _voice_text(body: dict) -> str:
+    direct = body.get("text")
+    if isinstance(direct, str):
+        return direct.strip()
+
+    result = body.get("result")
+    if isinstance(result, dict):
+        for key in ("text", "transcript"):
+            value = result.get(key)
+            if isinstance(value, str):
+                return value.strip()
+
+    data = body.get("data")
+    if isinstance(data, dict):
+        for key in ("text", "transcript"):
+            value = data.get(key)
+            if isinstance(value, str):
+                return value.strip()
+
+    try:
+        value = body["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, AttributeError, TypeError) as exc:
+        raise ModelDown from exc
+    if not isinstance(value, str):
+        raise ModelDown
+    return value.strip()

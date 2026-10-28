@@ -16,6 +16,8 @@ PROFILE_FACT_RETRY = "Пусто. Напиши факт о себе или «н�
 PROFILE_SAVED_TEXT = "Профиль сохранён."
 PROFILE_FACT_ADDED_TEXT = "Факт добавлен."
 PROFILE_FACT_SKIPPED_TEXT = "Ок, новый факт не добавляю."
+VOICE_UNSUPPORTED_TEXT = "Эта модель не разбирает голос."
+VOICE_NOT_RECOGNIZED_TEXT = "Голос не разобран."
 RECOVERABLE_TEXT = (
     "Этот экран устарел или больше недоступен. "
     "Нажми «настройки» в свежем сообщении."
@@ -47,6 +49,14 @@ def profile_entry_action() -> dict:
 
 def recoverable_action() -> dict:
     return {"kind": "text", "text": RECOVERABLE_TEXT}
+
+
+def voice_unsupported_action() -> dict:
+    return {"kind": "text", "text": VOICE_UNSUPPORTED_TEXT}
+
+
+def voice_not_recognized_action() -> dict:
+    return {"kind": "text", "text": VOICE_NOT_RECOGNIZED_TEXT}
 
 
 def profile_start_actions(profile: dict) -> list[dict]:
