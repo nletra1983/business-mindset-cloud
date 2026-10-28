@@ -24,8 +24,8 @@
 
 **Purpose**: Подготовить общее место для callback-ключей и меню настроек.
 
-- [ ] T001 Создать `app/account_settings.py` с константами callback-ключей (`settings`, `settings:model`, `settings:profile`) и текстовыми константами для меню первого уровня.
-- [ ] T002 [P] Добавить новый тестовый файл `tests/test_account_settings_entry.py` с базовым каркасом проверок для кнопки входа в настройки и меню.
+- [X] T001 Создать `app/account_settings.py` с константами callback-ключей (`settings`, `settings:model`, `settings:profile`) и текстовыми константами для меню первого уровня.
+- [X] T002 [P] Добавить новый тестовый файл `tests/test_account_settings_entry.py` с базовым каркасом проверок для кнопки входа в настройки и меню.
 
 ---
 
@@ -35,9 +35,9 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 [P] Реализовать в `app/account_settings.py` фабрики payload для действий `settings_menu` и recoverable-ответа для устаревших/неподдерживаемых callback.
-- [ ] T004 Добавить в `app/telegram_poll.py` обработку действия `settings_menu` в `_perform(...)` с отрисовкой меню из двух inline-кнопок.
-- [ ] T005 В `app/telegram_poll.py` подключить callback-роутинг для `settings`, `settings:model`, `settings:profile` так, чтобы текущие ветки `to_list`, `m:*`, `r:*` и защита duplicate update (`_seen/_mark`) оставались рабочими.
+- [X] T003 [P] Реализовать в `app/account_settings.py` фабрики payload для действий `settings_menu` и recoverable-ответа для устаревших/неподдерживаемых callback.
+- [X] T004 Добавить в `app/telegram_poll.py` обработку действия `settings_menu` в `_perform(...)` с отрисовкой меню из двух inline-кнопок.
+- [X] T005 В `app/telegram_poll.py` подключить callback-роутинг для `settings`, `settings:model`, `settings:profile` так, чтобы текущие ветки `to_list`, `m:*`, `r:*` и защита duplicate update (`_seen/_mark`) оставались рабочими.
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -51,14 +51,14 @@
 
 ### Tests for User Story 1
 
-- [ ] T006 [P] [US1] Дописать `tests/test_account_settings_entry.py`: `exit_row(...)` в `app/run_list.py` возвращает кнопку `настройки` с callback `settings` вместо прямого model-opener.
-- [ ] T007 [P] [US1] Дописать `tests/test_account_settings_entry.py`: при формировании ответа списка (`kind == "list"`) в `app/telegram_poll.py` клавиатура сохраняет доступ к `настройки`.
+- [X] T006 [P] [US1] Дописать `tests/test_account_settings_entry.py`: `exit_row(...)` в `app/run_list.py` возвращает кнопку `настройки` с callback `settings` вместо прямого model-opener.
+- [X] T007 [P] [US1] Дописать `tests/test_account_settings_entry.py`: при формировании ответа списка (`kind == "list"`) в `app/telegram_poll.py` клавиатура сохраняет доступ к `настройки`.
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Обновить `app/run_list.py`: `exit_row(...)` использует кнопку `настройки` и callback из `app/account_settings.py`.
-- [ ] T009 [US1] Обновить `app/telegram_poll.py`: ветка callback `settings` открывает меню настроек для поддерживаемых контекстов (незавершённый ход, список ходов, пост-финал).
-- [ ] T010 [US1] В `app/telegram_poll.py` убедиться, что стандартные send/edit-ответы после открытия настроек не теряют навигационную клавиатуру и не создают новый ход.
+- [X] T008 [US1] Обновить `app/run_list.py`: `exit_row(...)` использует кнопку `настройки` и callback из `app/account_settings.py`.
+- [X] T009 [US1] Обновить `app/telegram_poll.py`: ветка callback `settings` открывает меню настроек для поддерживаемых контекстов (незавершённый ход, список ходов, пост-финал).
+- [X] T010 [US1] В `app/telegram_poll.py` убедиться, что стандартные send/edit-ответы после открытия настроек не теряют навигационную клавиатуру и не создают новый ход.
 
 **Checkpoint**: User Story 1 is fully functional and independently testable
 
@@ -72,14 +72,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T011 [P] [US2] Дописать `tests/test_account_settings_entry.py`: меню настроек содержит ровно два пункта с подписями `выбор модели` и `информация о себе`.
-- [ ] T012 [P] [US2] Дописать `tests/test_account_settings_entry.py`: callback `settings:model` использует существующий поток выбора модели, а `settings:profile` уводит в entry-point ветки профиля.
+- [X] T011 [P] [US2] Дописать `tests/test_account_settings_entry.py`: меню настроек содержит ровно два пункта с подписями `выбор модели` и `информация о себе`.
+- [X] T012 [P] [US2] Дописать `tests/test_account_settings_entry.py`: callback `settings:model` использует существующий поток выбора модели, а `settings:profile` уводит в entry-point ветки профиля.
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Реализовать в `app/account_settings.py` inline-меню первого уровня с двумя пунктами и фиксированным порядком: `выбор модели`, `информация о себе`.
-- [ ] T014 [US2] Обновить `app/telegram_poll.py`: callback `settings:model` возвращает текущий flow выбора модели (`kind: models`, `PICK_TEXT`, `current`).
-- [ ] T015 [US2] Обновить `app/telegram_poll.py`: callback `settings:profile` возвращает entry-point сообщение для следующей истории без показа скрытого профиля.
+- [X] T013 [US2] Реализовать в `app/account_settings.py` inline-меню первого уровня с двумя пунктами и фиксированным порядком: `выбор модели`, `информация о себе`.
+- [X] T014 [US2] Обновить `app/telegram_poll.py`: callback `settings:model` возвращает текущий flow выбора модели (`kind: models`, `PICK_TEXT`, `current`).
+- [X] T015 [US2] Обновить `app/telegram_poll.py`: callback `settings:profile` возвращает entry-point сообщение для следующей истории без показа скрытого профиля.
 
 **Checkpoint**: User Stories 1 and 2 both work independently
 
@@ -93,14 +93,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T016 [P] [US3] Добавить `tests/test_account_settings_state.py`: открытие `settings` не меняет `run.step`, `run.status` и не добавляет новые реплики в текущем ходе.
-- [ ] T017 [P] [US3] Добавить `tests/test_account_settings_state.py`: неподдерживаемый или устаревший callback возвращает recoverable-сообщение и не меняет `person.current_model` / `run.model_requested`.
+- [X] T016 [P] [US3] Добавить `tests/test_account_settings_state.py`: открытие `settings` не меняет `run.step`, `run.status` и не добавляет новые реплики в текущем ходе.
+- [X] T017 [P] [US3] Добавить `tests/test_account_settings_state.py`: неподдерживаемый или устаревший callback возвращает recoverable-сообщение и не меняет `person.current_model` / `run.model_requested`.
 
 ### Implementation for User Story 3
 
-- [ ] T018 [US3] Обновить `app/telegram_poll.py`: для неподдерживаемых/stale settings-callback возвращать recoverable user message вместо молчаливого no-op.
-- [ ] T019 [US3] Обновить `app/telegram_poll.py`: гарантировать, что ветка `settings` не вызывает `write_model_state(...)`, `write_open_run_model(...)` и не изменяет окно хода.
-- [ ] T020 [US3] При необходимости уточнить helper-логику в `app/account_settings.py`, чтобы recoverable-путь и обычный путь имели единый формат действий для `_perform(...)`.
+- [X] T018 [US3] Обновить `app/telegram_poll.py`: для неподдерживаемых/stale settings-callback возвращать recoverable user message вместо молчаливого no-op.
+- [X] T019 [US3] Обновить `app/telegram_poll.py`: гарантировать, что ветка `settings` не вызывает `write_model_state(...)`, `write_open_run_model(...)` и не изменяет окно хода.
+- [X] T020 [US3] При необходимости уточнить helper-логику в `app/account_settings.py`, чтобы recoverable-путь и обычный путь имели единый формат действий для `_perform(...)`.
 
 **Checkpoint**: All user stories are independently functional and state-safe
 
@@ -110,9 +110,9 @@
 
 **Purpose**: Финальная валидация и фиксация результата.
 
-- [ ] T021 [P] Запустить `pytest tests/test_account_settings_entry.py tests/test_account_settings_state.py tests/test_model_choice.py` и зафиксировать результат в артефакте.
-- [ ] T022 Пройти сценарии из `specs/003-open-settings-from-keyboard/quickstart.md` и зафиксировать итоги (happy path + stale callback) в артефакте.
-- [ ] T023 Обновить `specs/003-open-settings-from-keyboard/quickstart.md` только если фактические шаги проверки отличаются от текущего описания.
+- [X] T021 [P] Запустить `pytest tests/test_account_settings_entry.py tests/test_account_settings_state.py tests/test_model_choice.py` и зафиксировать результат в артефакте.
+- [X] T022 Пройти сценарии из `specs/003-open-settings-from-keyboard/quickstart.md` и зафиксировать итоги (happy path + stale callback) в артефакте.
+- [X] T023 Обновить `specs/003-open-settings-from-keyboard/quickstart.md` только если фактические шаги проверки отличаются от текущего описания.
 
 ---
 
