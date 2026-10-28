@@ -13,6 +13,17 @@ def _callback_update(data: str) -> dict:
     }
 
 
+def _message_update(text: str) -> dict:
+    return {
+        "message": {
+            "message_id": 77,
+            "chat": {"id": 456},
+            "from": {"id": 123, "username": "alice"},
+            "text": text,
+        }
+    }
+
+
 def test_open_settings_does_not_mutate_run_or_model_state(monkeypatch):
     captured = {}
 
@@ -77,3 +88,39 @@ def test_stale_settings_callback_returns_recoverable_message_without_writes(monk
     assert len(actions) == 1
     assert actions[0]["kind"] == "text"
     assert actions[0]["text"] == RECOVERABLE_TEXT
+
+
+def test_profile_message_flow_does_not_touch_model_state_writes(monkeypatch):
+    captured = {}
+    monkeypatch.setattr("app.telegram_poll._typing", lambda _chat_id: None)
+    monkeypatch.setattr(
+        "app.telegram_poll.upsert_from_telegram",
+        lambda _conn, _tg_id, _username: {"id": "person-1"},
+    )
+    monkeypatch.setattr("app.telegram_poll._current_model", lambda _conn, _person_id: "deepseek-chat")
+    monkeypatch.setattr(
+        "app.telegram_poll.read_profile_edit_step",
+        lambda _conn, _person_id: "awaiting_strengths",
+    )
+    monkeypatch.setattr("app.telegram_poll.write_visible_strengths", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr("app.telegram_poll.write_profile_edit_step", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        "app.telegram_poll._perform",
+        lambda _chat_id, actions, current: captured.update(
+            {"actions": actions, "current_model": current}
+        ),
+    )
+    monkeypatch.setattr(
+        "app.telegram_poll.write_model_state",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("write_model_state should not be called")),
+    )
+    monkeypatch.setattr(
+        "app.telegram_poll.write_open_run_model",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("write_open_run_model should not be called")),
+    )
+
+    _dispatch(type("Conn", (), {"commit": lambda self: None})(), _message_update("умею учиться"))
+
+    actions = captured["actions"]
+    assert captured["current_model"] == "deepseek-chat"
+    assert actions[0]["kind"] == "text"
