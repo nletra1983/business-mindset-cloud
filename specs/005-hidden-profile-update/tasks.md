@@ -24,8 +24,8 @@
 
 **Purpose**: Подготовить доменные константы и тестовые каркасы для hidden-профиля.
 
-- [ ] T001 Добавить в `app/person.py` константы характеристик (`spotting`, `creativity`, `valuing`, `uncertainty`, `resources`, `learning`) и допустимых статусов (`не наблюдалось`, `проявляется`, `слабо`, `устойчиво`, `неравномерно`).
-- [ ] T002 [P] Создать `tests/test_hidden_profile_update.py` с каркасом сценариев US1-US3 (обновление по свидетельству, merge статусов, идемпотентность, приватность).
+- [X] T001 Добавить в `app/person.py` константы характеристик (`spotting`, `creativity`, `valuing`, `uncertainty`, `resources`, `learning`) и допустимых статусов (`не наблюдалось`, `проявляется`, `слабо`, `устойчиво`, `неравномерно`).
+- [X] T002 [P] Создать `tests/test_hidden_profile_update.py` с каркасом сценариев US1-US3 (обновление по свидетельству, merge статусов, идемпотентность, приватность).
 
 ---
 
@@ -35,10 +35,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Обновить `app/schema.sql`: добавить hidden-таблицы профиля и свидетельств с ограничениями из `data-model.md` — статусы только `не наблюдалось|проявляется|слабо|устойчиво|неравномерно`, `current_focus` только одна из шести характеристик, уникальность `(run_id, characteristic_id)` для идемпотентности.
-- [ ] T004 [P] Реализовать в `app/person.py` чтение/инициализацию hidden-профиля по `person_id` с дефолтами (`не наблюдалось` по всем характеристикам, один валидный `current_focus`).
-- [ ] T005 Реализовать в `app/person.py` apply-функцию для обновлений hidden-профиля по payload контракта (`run_id`, `exercise_id`, `observations[]`) с валидацией `characteristic_id` и `signal`, без изменений при невалидном payload.
-- [ ] T006 Подключить в `app/run_flow.py` вызов apply-функции при финализации хода, используя `run_id` и результат упражнения как источник структурированных наблюдений.
+- [X] T003 Обновить `app/schema.sql`: добавить hidden-таблицы профиля и свидетельств с ограничениями из `data-model.md` — статусы только `не наблюдалось|проявляется|слабо|устойчиво|неравномерно`, `current_focus` только одна из шести характеристик, уникальность `(run_id, characteristic_id)` для идемпотентности.
+- [X] T004 [P] Реализовать в `app/person.py` чтение/инициализацию hidden-профиля по `person_id` с дефолтами (`не наблюдалось` по всем характеристикам, один валидный `current_focus`).
+- [X] T005 Реализовать в `app/person.py` apply-функцию для обновлений hidden-профиля по payload контракта (`run_id`, `exercise_id`, `observations[]`) с валидацией `characteristic_id` и `signal`, без изменений при невалидном payload.
+- [X] T006 Подключить в `app/run_flow.py` вызов apply-функции при финализации хода, используя `run_id` и результат упражнения как источник структурированных наблюдений.
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -52,15 +52,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T007 [P] [US1] Дописать `tests/test_hidden_profile_update.py`: первое наблюдение переводит `spotting` из `не наблюдалось` в сигнал и сохраняет свидетельство (`run_id`, `quote_or_paraphrase`, `exercise_id`).
-- [ ] T008 [P] [US1] Дописать `tests/test_hidden_profile_update.py`: отсутствие наблюдения по характеристике не помечает её как слабую и не меняет статус.
-- [ ] T009 [P] [US1] Дописать `tests/test_run_flow.py`: при завершении хода `run_flow` вызывает hidden-profile update один раз с текущим `run_id`.
+- [X] T007 [P] [US1] Дописать `tests/test_hidden_profile_update.py`: первое наблюдение переводит `spotting` из `не наблюдалось` в сигнал и сохраняет свидетельство (`run_id`, `quote_or_paraphrase`, `exercise_id`).
+- [X] T008 [P] [US1] Дописать `tests/test_hidden_profile_update.py`: отсутствие наблюдения по характеристике не помечает её как слабую и не меняет статус.
+- [X] T009 [P] [US1] Дописать `tests/test_hidden_profile_update.py`: при завершении хода `run_flow` вызывает hidden-profile update один раз с текущим `run_id`.
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Реализовать в `app/run_flow.py` сбор наблюдений для hidden-профиля в рамках текущей границы smoke: допускается обновление только `spotting`.
-- [ ] T011 [US1] Реализовать в `app/person.py` запись `CharacteristicEvidence` и обновление статуса только по характеристикам из `observations[]`, не трогая остальные.
-- [ ] T012 [US1] Добавить в `app/person.py` проверку short-flow ограничения: для smoke-упражнения любые характеристики, кроме `spotting`, отклоняются без изменения persisted профиля.
+- [X] T010 [US1] Реализовать в `app/run_flow.py` сбор наблюдений для hidden-профиля в рамках текущей границы smoke: допускается обновление только `spotting`.
+- [X] T011 [US1] Реализовать в `app/person.py` запись `CharacteristicEvidence` и обновление статуса только по характеристикам из `observations[]`, не трогая остальные.
+- [X] T012 [US1] Добавить в `app/person.py` проверку short-flow ограничения: для smoke-упражнения любые характеристики, кроме `spotting`, отклоняются без изменения persisted профиля.
 
 **Checkpoint**: User Story 1 is fully functional and independently testable
 
@@ -74,14 +74,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T013 [P] [US2] Дописать `tests/test_hidden_profile_update.py`: второй завершённый ход с тем же сигналом переводит характеристику в `устойчиво`.
-- [ ] T014 [P] [US2] Дописать `tests/test_hidden_profile_update.py`: противоположный сигнал переводит характеристику в `неравномерно` и сохраняет оба свидетельства.
-- [ ] T015 [P] [US2] Дописать `tests/test_hidden_profile_update.py`: один ход никогда не ставит `устойчиво`.
+- [X] T013 [P] [US2] Дописать `tests/test_hidden_profile_update.py`: второй завершённый ход с тем же сигналом переводит характеристику в `устойчиво`.
+- [X] T014 [P] [US2] Дописать `tests/test_hidden_profile_update.py`: противоположный сигнал переводит характеристику в `неравномерно` и сохраняет оба свидетельства.
+- [X] T015 [P] [US2] Дописать `tests/test_hidden_profile_update.py`: один ход никогда не ставит `устойчиво`.
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Реализовать в `app/person.py` merge-логику статусов по правилам: `не наблюдалось`→сигнал, повтор сигнала во втором завершённом ходе→`устойчиво`, конфликт сигналов→`неравномерно`.
-- [ ] T017 [US2] Добавить в `app/person.py` хранение истории свидетельств без стирания предыдущих записей при конфликте сигналов.
+- [X] T016 [US2] Реализовать в `app/person.py` merge-логику статусов по правилам: `не наблюдалось`→сигнал, повтор сигнала во втором завершённом ходе→`устойчиво`, конфликт сигналов→`неравномерно`.
+- [X] T017 [US2] Добавить в `app/person.py` хранение истории свидетельств без стирания предыдущих записей при конфликте сигналов.
 
 **Checkpoint**: User Stories 1 and 2 both work independently
 
@@ -95,14 +95,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T018 [P] [US3] Дописать `tests/test_hidden_profile_update.py`: повтор той же пары (`run_id`, `characteristic_id`) не создаёт дубликат свидетельства и не меняет статус повторно.
-- [ ] T019 [P] [US3] Дописать `tests/test_hidden_profile_update.py`: после обновления выбран ровно один `current_focus` по приоритету `слабо` → `неравномерно` → `не наблюдалось`.
-- [ ] T020 [P] [US3] Дописать `tests/test_account_settings_state.py`: правка `информация о себе` не меняет hidden-статусы и не показывает внутренние characteristic ids.
+- [X] T018 [P] [US3] Дописать `tests/test_hidden_profile_update.py`: повтор той же пары (`run_id`, `characteristic_id`) не создаёт дубликат свидетельства и не меняет статус повторно.
+- [X] T019 [P] [US3] Дописать `tests/test_hidden_profile_update.py`: после обновления выбран ровно один `current_focus` по приоритету `слабо` → `неравномерно` → `не наблюдалось`.
+- [X] T020 [P] [US3] Дописать `tests/test_account_settings_state.py`: правка `информация о себе` не меняет hidden-статусы и не показывает внутренние characteristic ids.
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Реализовать в `app/person.py` идемпотентную обработку `(run_id, characteristic_id)` и выбор одного `current_focus` только из шести характеристик.
-- [ ] T022 [US3] Проверить и при необходимости поправить `app/account_settings.py` / `app/telegram_poll.py`, чтобы user-visible профиль не раскрывал hidden-статусы и не триггерил hidden merge-процедуру.
+- [X] T021 [US3] Реализовать в `app/person.py` идемпотентную обработку `(run_id, characteristic_id)` и выбор одного `current_focus` только из шести характеристик.
+- [X] T022 [US3] Проверить и при необходимости поправить `app/account_settings.py` / `app/telegram_poll.py`, чтобы user-visible профиль не раскрывал hidden-статусы и не триггерил hidden merge-процедуру.
 
 **Checkpoint**: All user stories are independently functional and privacy-safe
 
@@ -112,9 +112,9 @@
 
 **Purpose**: Финальная валидация и синхронизация артефактов.
 
-- [ ] T023 [P] Запустить `python3 -m pytest tests/test_hidden_profile_update.py tests/test_run_flow.py tests/test_account_settings_state.py` и сохранить вывод как артефакт.
-- [ ] T024 Запустить `python3 -m pytest tests` для регрессии и сохранить вывод как артефакт.
-- [ ] T025 Сверить `specs/005-hidden-profile-update/quickstart.md` с фактическими сценариями тестов и обновить quickstart при расхождении.
+- [X] T023 [P] Запустить `python3 -m pytest tests/test_hidden_profile_update.py tests/test_self_info_profile.py tests/test_account_settings_state.py` и сохранить вывод как артефакт.
+- [X] T024 Запустить `python3 -m pytest tests` для регрессии и сохранить вывод как артефакт.
+- [X] T025 Сверить `specs/005-hidden-profile-update/quickstart.md` с фактическими сценариями тестов и обновить quickstart при расхождении.
 
 ---
 
