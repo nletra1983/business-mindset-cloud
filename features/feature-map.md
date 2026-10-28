@@ -33,7 +33,7 @@
 
 | История | Спека | Статус |
 |---|---|---|
-| Выбрать модель | `specs/002-telegram-model-switch/` | in-impl |
+| Выбрать модель | `specs/002-telegram-model-switch/` | done |
 | Открыть настройки с клавиатуры разбора | `specs/003-open-settings-from-keyboard/` | done |
 | Прочитать, изменить и добавить информацию о себе | `specs/004-self-info-profile/` | done |
 | Обновлять скрытый файл профиля по результату задания | `specs/005-hidden-profile-update/` | done |

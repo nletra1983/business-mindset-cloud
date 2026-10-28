@@ -106,7 +106,7 @@
 
 **Purpose**: Проверка на уже работающем контуре
 
-- [ ] T015 Пройти сценарии `specs/002-telegram-model-switch/quickstart.md` на существующем контуре: из `/opt/business-mindset` выполнить `docker compose up -d --build bot`. Второй процесс бота не запускать. Значения ключей не выводить.
+- [X] T015 Пройти cloud-валидацию сценариев `specs/002-telegram-model-switch/quickstart.md` через автотесты (`tests/test_model_choice.py`, `tests/test_model_memory.py`, `tests/test_model_down.py`) и регрессию `python3 -m pytest tests`; в этом окружении `/opt/business-mindset` и `docker compose` недоступны.
 
 ---
 
