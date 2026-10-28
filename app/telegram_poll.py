@@ -5,9 +5,16 @@ import httpx
 
 from app.config import telegram_base, telegram_token
 from app.db import apply_schema, connect
-from app.person import upsert_from_telegram
-from app.run_flow import handle_text
-from app.run_list import exit_keyboard, resume, show_list
+from app.model_switch import (
+    MODEL_CALLBACK,
+    PICK_TEXT,
+    apply_choice,
+    is_model_id,
+    model_keyboard,
+)
+from app.person import read_model_state, upsert_from_telegram, write_model_state, write_open_run_model
+from app.run_flow import handle_text, open_window
+from app.run_list import exit_keyboard, exit_row, resume, show_list
 
 log = logging.getLogger("bot")
 
@@ -70,11 +77,31 @@ def _dispatch(conn, update: dict) -> None:
     person = upsert_from_telegram(conn, int(user["id"]), user.get("username"))
     if data == "to_list":
         actions = show_list(conn, person["id"])
+    elif data == MODEL_CALLBACK:
+        state = read_model_state(conn, person["id"])
+        actions = [{"kind": "models", "text": PICK_TEXT, "current": state["current_model"]}]
+    elif data.startswith("m:"):
+        current = _choose(conn, person["id"], data[2:])
+        actions = [{"kind": "models", "text": PICK_TEXT, "current": current}]
     elif data.startswith("r:"):
         actions = resume(conn, person["id"], data[2:])
     else:
         actions = []
     _perform(chat["id"], actions)
+
+
+def _choose(conn, person_id, model_id: str) -> str:
+    state = read_model_state(conn, person_id)
+    if not is_model_id(model_id):
+        return state["current_model"]
+    window = open_window(conn, person_id)
+    target = window if window and window.get("status") == "open" else None
+    apply_choice(state, target, model_id)
+    write_model_state(conn, person_id, state)
+    if target is not None:
+        write_open_run_model(conn, target["id"], target["model_requested"])
+    conn.commit()
+    return state["current_model"]
 
 
 def _perform(chat_id: int, actions: list[dict]) -> None:
@@ -85,10 +112,19 @@ def _perform(chat_id: int, actions: list[dict]) -> None:
         elif kind == "list":
             markup = {"inline_keyboard": action["buttons"]} if action["buttons"] else exit_keyboard()
             if action["buttons"]:
-                markup["inline_keyboard"].append([{"text": "к другим вопросам", "callback_data": "to_list"}])
+                markup["inline_keyboard"].append(exit_row())
             _call(
                 "sendMessage",
                 {"chat_id": chat_id, "text": action["text"], "reply_markup": markup},
+            )
+        elif kind == "models":
+            _call(
+                "sendMessage",
+                {
+                    "chat_id": chat_id,
+                    "text": action["text"],
+                    "reply_markup": model_keyboard(action["current"]),
+                },
             )
         else:
             _call(

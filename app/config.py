@@ -8,6 +8,15 @@ SKILL_RELATIVE = Path(
 MODEL_REQUESTED = "deepseek-chat"
 ACCESS_MODE = "service_free"
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+GIGACHAT_OAUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
+GIGACHAT_URL = "https://api.giga.chat/v1/chat/completions"
+GIGACHAT_SCOPE = "GIGACHAT_API_PERS"
+GLM_URL = "https://api.z.ai/api/paas/v4/chat/completions"
+MODELS = (
+    {"id": "deepseek-chat", "label": "DeepSeek"},
+    {"id": "GigaChat-2", "label": "GigaChat"},
+    {"id": "glm-5.3-flash", "label": "GLM"},
+)
 
 
 def _env(name: str) -> str:
@@ -23,6 +32,14 @@ def telegram_base() -> str:
 
 def telegram_token() -> str:
     return _env("TG_GETBUSINESSIDEA_TOKEN")
+
+
+def gigachat_key() -> str:
+    return _env("GIGACHAT_AUTH_KEY")
+
+
+def zai_key() -> str:
+    return _env("ZAI_API_KEY")
 
 
 def deepseek_key() -> str:

@@ -1,9 +1,4 @@
-import httpx
-
-from app.config import DEEPSEEK_URL, deepseek_key
-
-class ModelDown(Exception):
-    pass
+from app.model_client import ModelDown, complete
 
 
 _EVENT_RULES = (
@@ -17,40 +12,6 @@ _SCALE_RULES = (
     "и срок или обратимость. "
     "Слабо: «все», «рынок», «всегда» без места и срока."
 )
-
-
-def _post(payload: dict) -> dict:
-    try:
-        response = httpx.post(
-            DEEPSEEK_URL,
-            headers={"Authorization": f"Bearer {deepseek_key()}"},
-            json=payload,
-            timeout=40.0,
-        )
-        response.raise_for_status()
-        return response.json()
-    except (httpx.HTTPError, ValueError) as exc:
-        raise ModelDown from exc
-
-
-def complete(messages: list[dict]) -> tuple[str, str | None]:
-    payload = {
-        "model": "deepseek-chat",
-        "messages": messages,
-        "temperature": 0.2,
-    }
-    try:
-        body = _post(payload)
-    except ModelDown:
-        body = _post(payload)
-    try:
-        content = body["choices"][0]["message"]["content"].strip()
-    except (KeyError, IndexError, AttributeError, TypeError) as exc:
-        raise ModelDown from exc
-    returned = body.get("model")
-    if not isinstance(returned, str) or not returned.strip():
-        returned = None
-    return content, returned
 
 
 def parse_judge_reply(text: str) -> tuple[bool, str]:
@@ -74,10 +35,11 @@ def parse_judge_reply(text: str) -> tuple[bool, str]:
     return False, missing
 
 
-def judge_block(block: str, topic: str, answer: str) -> tuple[bool, str, str | None]:
+def judge_block(block: str, topic: str, answer: str, model_id: str) -> tuple[bool, str, str | None]:
     """Evaluate answer with DeepSeek against smoke rules. block: event|scale."""
     rules = _EVENT_RULES if block == "event" else _SCALE_RULES
     text, returned = complete(
+        model_id,
         [
             {
                 "role": "system",
@@ -106,8 +68,9 @@ def judge_block(block: str, topic: str, answer: str) -> tuple[bool, str, str | N
     return ok, missing, returned
 
 
-def finale(topic: str, event_answer: str, scale_answer: str) -> tuple[str, str, str, str, str | None]:
+def finale(topic: str, event_answer: str, scale_answer: str, model_id: str) -> tuple[str, str, str, str, str | None]:
     text, returned = complete(
+        model_id,
         [
             {
                 "role": "system",

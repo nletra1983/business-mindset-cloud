@@ -1,8 +1,13 @@
 CREATE TABLE IF NOT EXISTS person (
     id uuid PRIMARY KEY,
     accepting_new boolean NOT NULL DEFAULT false,
+    current_model text NOT NULL DEFAULT 'deepseek-chat',
+    last_answered_model text NULL,
     created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE person ADD COLUMN IF NOT EXISTS current_model text NOT NULL DEFAULT 'deepseek-chat';
+ALTER TABLE person ADD COLUMN IF NOT EXISTS last_answered_model text NULL;
 
 CREATE TABLE IF NOT EXISTS channel_link (
     id uuid PRIMARY KEY,

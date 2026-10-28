@@ -1,5 +1,6 @@
 .git
 .secrets
+secrets
 **/.env
 **/.env.*
 **/__pycache__

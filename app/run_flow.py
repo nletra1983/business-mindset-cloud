@@ -2,13 +2,13 @@ import uuid
 
 from app.config import ACCESS_MODE, MODEL_REQUESTED, SKILL_VERSION
 from app.deepseek import ModelDown, finale, judge_block
-from app.person import has_any_run, set_accepting_new
+from app.model_switch import UNAVAILABLE, apply_fallback, note_answered
+from app.person import has_any_run, read_model_state, set_accepting_new, write_model_state, write_open_run_model
 from app.skill import MISSED_LINE, blank_topic, event_prompt, scale_prompt
 from app.summary import save_summary
 
 STATUSES = ("open", "completed")
 EXIT_LABEL = "к другим вопросам"
-CONNECTION = "Проблемы со связью. Продолжить можно позже."
 
 
 def silence(state: dict) -> dict:
@@ -22,11 +22,13 @@ def handle_text(conn, person: dict, chat_id: int, message_id: int, text: str) ->
     if person["accepting_new"] or not has_any_run(conn, person["id"]):
         if blank_topic(text):
             return [_text("Пусто. Сформулируй новость или проблему своими словами. Событие я не выдумываю.")]
-        return _start(conn, person["id"], chat_id, message_id, text.strip())
+        return _start(conn, person, chat_id, message_id, text.strip())
     return [_text("Чтобы начать другой ход, нажми «к другим вопросам».")]
 
 
-def _start(conn, person_id, chat_id: int, message_id: int, topic: str) -> list[dict]:
+def _start(conn, person: dict, chat_id: int, message_id: int, topic: str) -> list[dict]:
+    person_id = person["id"]
+    requested = person.get("current_model") or MODEL_REQUESTED
     run_id = uuid.uuid4()
     with conn.cursor() as cur:
         cur.execute(
@@ -43,7 +45,7 @@ def _start(conn, person_id, chat_id: int, message_id: int, topic: str) -> list[d
                 %s, %s, %s, %s, true
             )
             """,
-            (run_id, person_id, SKILL_VERSION, topic, ACCESS_MODE, MODEL_REQUESTED, chat_id, message_id),
+            (run_id, person_id, SKILL_VERSION, topic, ACCESS_MODE, requested, chat_id, message_id),
         )
         _utter(cur, run_id, "human", topic, message_id)
         question = event_prompt(topic)
@@ -61,14 +63,11 @@ def _answer(conn, run: dict, message_id: int, text: str) -> list[dict]:
         return _finish(conn, run)
     block = "event" if run["step"] == "event" else "scale"
     try:
-        ok, missing, returned = judge_block(block, run["topic_text"], text)
+        ok, missing, returned = judge_block(block, run["topic_text"], text, run["model_requested"])
     except ModelDown:
-        with conn.cursor() as cur:
-            _utter(cur, run["id"], "human", text, message_id)
-            _utter(cur, run["id"], "agent", CONNECTION, None)
-        conn.commit()
-        return [_text(CONNECTION)]
+        return _unavailable(conn, run, text, message_id)
     with conn.cursor() as cur:
+        _mark_answered(cur, run)
         _utter(cur, run["id"], "human", text, message_id)
         if returned:
             cur.execute(
@@ -112,18 +111,16 @@ def _finish(conn, run: dict) -> list[dict]:
     event_answer, scale_answer = _answers(conn, run)
     try:
         spoken, worked, weak, missed, returned = finale(
-            run["topic_text"], event_answer, scale_answer
+            run["topic_text"], event_answer, scale_answer, run["model_requested"]
         )
     except ModelDown:
-        with conn.cursor() as cur:
-            _utter(cur, run["id"], "agent", CONNECTION, None)
-        conn.commit()
-        return [_text(CONNECTION)]
+        return _unavailable(conn, run, None, None)
     if MISSED_LINE not in missed:
         missed = f"{missed}\n{MISSED_LINE}".strip()
         spoken = f"{spoken}\n{MISSED_LINE}"
     save_summary(conn, run["id"], worked, weak, missed)
     with conn.cursor() as cur:
+        _mark_answered(cur, run)
         cur.execute(
             """
             UPDATE run
@@ -155,7 +152,8 @@ def focus(conn, person_id, run_id) -> dict | None:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT id, status, step, topic_text, skill_version, event_answer, scale_answer
+            SELECT id, status, step, topic_text, skill_version, event_answer, scale_answer,
+                   model_requested, person_id
             FROM run
             WHERE id = %s AND person_id = %s AND status = 'open'
             """,
@@ -179,6 +177,8 @@ def focus(conn, person_id, run_id) -> dict | None:
         "skill_version": row[4],
         "event_answer": row[5],
         "scale_answer": row[6],
+        "model_requested": row[7],
+        "person_id": row[8],
     }
 
 
@@ -200,7 +200,8 @@ def _window(conn, person_id) -> dict | None:
     with conn.cursor() as cur:
         cur.execute(
             """
-            SELECT id, status, step, topic_text, skill_version, event_answer, scale_answer
+            SELECT id, status, step, topic_text, skill_version, event_answer, scale_answer,
+                   model_requested, person_id
             FROM run
             WHERE person_id = %s AND in_window = true
             ORDER BY updated_at DESC
@@ -219,7 +220,37 @@ def _window(conn, person_id) -> dict | None:
         "skill_version": row[4],
         "event_answer": row[5],
         "scale_answer": row[6],
+        "model_requested": row[7],
+        "person_id": row[8],
     }
+
+
+def open_window(conn, person_id) -> dict | None:
+    return _window(conn, person_id)
+
+
+def _mark_answered(cur, run: dict) -> None:
+    state = {"last_answered_model": None}
+    note_answered(state, run["model_requested"])
+    cur.execute(
+        "UPDATE person SET last_answered_model = %s WHERE id = %s",
+        (state["last_answered_model"], run["person_id"]),
+    )
+
+
+def _unavailable(conn, run: dict, human_text: str | None, message_id: int | None) -> list[dict]:
+    state = read_model_state(conn, run["person_id"])
+    target = run if run.get("status") == "open" else None
+    apply_fallback(state, target)
+    write_model_state(conn, run["person_id"], state)
+    if target is not None:
+        write_open_run_model(conn, run["id"], run["model_requested"])
+    with conn.cursor() as cur:
+        if human_text is not None:
+            _utter(cur, run["id"], "human", human_text, message_id)
+        _utter(cur, run["id"], "agent", UNAVAILABLE, None)
+    conn.commit()
+    return [{"kind": "models", "text": UNAVAILABLE, "current": state["current_model"]}]
 
 
 def _answers(conn, run: dict) -> tuple[str, str]:

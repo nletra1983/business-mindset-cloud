@@ -24,7 +24,7 @@
 
 **Purpose**: Отдать уже лежащие ключи в тот же контейнер
 
-- [ ] T001 [P] Добавить `./secrets/sber.env` и `./secrets/zai.env` в `env_file` сервиса `bot` в `docker-compose.yml`. Сервис `db` не менять. Второй сервис не добавлять. Значения ключей не писать.
+- [X] T001 [P] Добавить `./secrets/sber.env` и `./secrets/zai.env` в `env_file` сервиса `bot` в `docker-compose.yml`. Сервис `db` не менять. Второй сервис не добавлять. Значения ключей не писать.
 
 ---
 
@@ -34,10 +34,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Добавить в `app/schema.sql` к уже существующей таблице `person` колонки `current_model text NOT NULL` со значением по умолчанию `deepseek-chat` и `last_answered_model text NULL`. Для уже созданной таблицы использовать `ADD COLUMN IF NOT EXISTS`, а не только `CREATE TABLE IF NOT EXISTS`. Статус `paused` и `DELETE` не добавлять.
-- [ ] T003 [P] Записать в `app/config.py` три модели в порядке DeepSeek `deepseek-chat`, GigaChat `GigaChat-2`, GLM `glm-5.3-flash` и подписи кнопок `DeepSeek`, `GigaChat`, `GLM`.
-- [ ] T004 В `app/person.py` читать и записывать `current_model` и `last_answered_model`. Telegram user id остаётся только привязкой, не ключом человека.
-- [ ] T005 Реализовать в `app/model_client.py` один вызов по id модели через `httpx`. DeepSeek: `POST https://api.deepseek.com/chat/completions`, модель `deepseek-chat`. GigaChat: `POST https://ngw.devices.sberbank.ru:9443/api/v2/oauth` со scope `GIGACHAT_API_PERS` и ключом `GIGACHAT_AUTH_KEY`, затем `POST https://api.giga.chat/v1/chat/completions`, модель `GigaChat-2`; токен человеку не показывать и в Postgres не писать; проверку TLS не отключать. GLM: `POST https://api.z.ai/api/paas/v4/chat/completions`, `Authorization: Bearer` и `ZAI_API_KEY`, модель `glm-5.3-flash`. Отдельный SDK не добавлять.
+- [X] T002 Добавить в `app/schema.sql` к уже существующей таблице `person` колонки `current_model text NOT NULL` со значением по умолчанию `deepseek-chat` и `last_answered_model text NULL`. Для уже созданной таблицы использовать `ADD COLUMN IF NOT EXISTS`, а не только `CREATE TABLE IF NOT EXISTS`. Статус `paused` и `DELETE` не добавлять.
+- [X] T003 [P] Записать в `app/config.py` три модели в порядке DeepSeek `deepseek-chat`, GigaChat `GigaChat-2`, GLM `glm-5.3-flash` и подписи кнопок `DeepSeek`, `GigaChat`, `GLM`.
+- [X] T004 В `app/person.py` читать и записывать `current_model` и `last_answered_model`. Telegram user id остаётся только привязкой, не ключом человека.
+- [X] T005 Реализовать в `app/model_client.py` один вызов по id модели через `httpx`. DeepSeek: `POST https://api.deepseek.com/chat/completions`, модель `deepseek-chat`. GigaChat: `POST https://ngw.devices.sberbank.ru:9443/api/v2/oauth` со scope `GIGACHAT_API_PERS` и ключом `GIGACHAT_AUTH_KEY`, затем `POST https://api.giga.chat/v1/chat/completions`, модель `GigaChat-2`; токен человеку не показывать и в Postgres не писать; проверку TLS не отключать. GLM: `POST https://api.z.ai/api/paas/v4/chat/completions`, `Authorization: Bearer` и `ZAI_API_KEY`, модель `glm-5.3-flash`. Отдельный SDK не добавлять.
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -53,13 +53,13 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T006 [P] [US1] Написать падающий `pytest` в `tests/test_model_choice.py`: выбор имени ставит `current_model`, у открытого хода `model_requested` становится тем же id, уже записанные реплики не меняются, у текущей кнопки стиль `success`, у двух остальных стиля нет.
+- [X] T006 [P] [US1] Написать падающий `pytest` в `tests/test_model_choice.py`: выбор имени ставит `current_model`, у открытого хода `model_requested` становится тем же id, уже записанные реплики не меняются, у текущей кнопки стиль `success`, у двух остальных стиля нет.
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Добавить кнопку «модель» рядом с «к другим вопросам» в `app/run_list.py`.
-- [ ] T008 [US1] В `app/telegram_poll.py` по нажатию «модель» показывать три кнопки в порядке DeepSeek, GigaChat, GLM. Текущая — стиль `success`. Нажатие имени ставит `current_model` и `model_requested` открытого хода. Новый ход не создаётся. Текст кнопок не размечается жирным. Тот же update id проходит через уже существующую проверку `processed_telegram_update` и второй раз модель не меняет.
-- [ ] T009 [US1] В `app/run_flow.py` следующий вопрос, оценка ответа и финал незавершённого хода вызывают `app/model_client.py` с `model_requested` этого хода. Уже принятые ответы не переписываются.
+- [X] T007 [US1] Добавить кнопку «модель» рядом с «к другим вопросам» в `app/run_list.py`.
+- [X] T008 [US1] В `app/telegram_poll.py` по нажатию «модель» показывать три кнопки в порядке DeepSeek, GigaChat, GLM. Текущая — стиль `success`. Нажатие имени ставит `current_model` и `model_requested` открытого хода. Новый ход не создаётся. Текст кнопок не размечается жирным. Тот же update id проходит через уже существующую проверку `processed_telegram_update` и второй раз модель не меняет.
+- [X] T009 [US1] В `app/run_flow.py` следующий вопрос, оценка ответа и финал незавершённого хода вызывают `app/model_client.py` с `model_requested` этого хода. Уже принятые ответы не переписываются.
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -73,11 +73,11 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T010 [P] [US2] Написать падающий `pytest` в `tests/test_model_memory.py`: смена после `status = completed` не меняет реплики, сводку и `model_requested` этого хода; `current_model` человека меняется; при отсутствии выбора `current_model` равен `deepseek-chat`.
+- [X] T010 [P] [US2] Написать падающий `pytest` в `tests/test_model_memory.py`: смена после `status = completed` не меняет реплики, сводку и `model_requested` этого хода; `current_model` человека меняется; при отсутствии выбора `current_model` равен `deepseek-chat`.
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] В `app/telegram_poll.py` выбор из списка ходов и после финала обновляет только `current_model` человека. Если ход уже `completed`, его `model_requested`, реплики и сводку не обновлять.
+- [X] T011 [US2] В `app/telegram_poll.py` выбор из списка ходов и после финала обновляет только `current_model` человека. Если ход уже `completed`, его `model_requested`, реплики и сводку не обновлять.
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -91,12 +91,12 @@
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T012 [P] [US3] Написать падающий `pytest` в `tests/test_model_down.py`: первый обрыв повторяет тот же вызов один раз; второй обрыв при заполненном `last_answered_model` ставит его в `current_model` и в `model_requested` открытого хода, статус остаётся `open`; при пустом `last_answered_model` `current_model` не подменяется.
+- [X] T012 [P] [US3] Написать падающий `pytest` в `tests/test_model_down.py`: первый обрыв повторяет тот же вызов один раз; второй обрыв при заполненном `last_answered_model` ставит его в `current_model` и в `model_requested` открытого хода, статус остаётся `open`; при пустом `last_answered_model` `current_model` не подменяется.
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] В `app/model_client.py` повторять неудачный вызов один раз. В `app/run_flow.py` после второго обрыва не завершать ход и не вводить статус «пауза». Если `last_answered_model` заполнен, сделать его `current_model` и `model_requested` открытого хода. Если пуст, оставить `current_model`. Успешный ответ записывает запрошенный id в `last_answered_model`.
-- [ ] T014 [US3] В `app/telegram_poll.py` сообщение о недоступности выбранной модели содержит те же три кнопки. Зелёная (`success`) — та, что стала текущей после правила T013.
+- [X] T013 [US3] В `app/model_client.py` повторять неудачный вызов один раз. В `app/run_flow.py` после второго обрыва не завершать ход и не вводить статус «пауза». Если `last_answered_model` заполнен, сделать его `current_model` и `model_requested` открытого хода. Если пуст, оставить `current_model`. Успешный ответ записывает запрошенный id в `last_answered_model`.
+- [X] T014 [US3] В `app/telegram_poll.py` сообщение о недоступности выбранной модели содержит те же три кнопки. Зелёная (`success`) — та, что стала текущей после правила T013.
 
 **Checkpoint**: All user stories should now be independently functional
 

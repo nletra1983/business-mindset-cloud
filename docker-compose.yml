@@ -15,6 +15,8 @@ services:
       - ./secrets/telegram.env
       - ./secrets/telegram-api.env
       - ./secrets/deepseek.env
+      - ./secrets/sber.env
+      - ./secrets/zai.env
       - ./secrets/postgres.env
     environment:
       POSTGRES_HOST: db
