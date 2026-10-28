@@ -10,8 +10,8 @@
 ## На ПК (бизнес-логика)
 
 1. Открыть этот проект в Cursor.
-2. Писать постановку в FeatureLC / FeatureArtifacts / ProductArtifacts (как принято для фичи).
-3. Обновить [features/feature-map.md](../features/feature-map.md): путь + статус `ready-for-speckit`.
+2. Писать бизнес-логику фичи в `features/<фича>/business-logic.md`. Из неё нарезаются истории. Граница истории для спеки может лежать в ProductArtifacts.
+3. Обновить [features/feature-map.md](../features/feature-map.md): фича, её истории, статус каждой.
 4. `git add` / `commit` / `push`.
 5. При необходимости локально: `/speckit-specify` … (или сразу с телефона).
 
@@ -25,10 +25,11 @@
 
 ```text
 /speckit-specify
-Срез из feature-map: F-NEXT
-Бизнес-постановка: <путь из таблицы>
+Фича из feature-map: Настройка аккаунта
+Истории: открыть настройки; информация о себе; скрытый файл профиля
+Граница: ProductArtifacts/skill-profile-slice.md
+Бизнес-логика: features/account-settings/business-logic.md
 Дыры не закрывать — спрашивай меня в этом чате.
-В конце ответа: списки «Проверить» и «Не читать» (только новое / вопросы / вердикт).
 ```
 
 Дальше по очереди: `/speckit-plan` → `/speckit-tasks` → `/speckit-implement` (с паузами на твои ответы).

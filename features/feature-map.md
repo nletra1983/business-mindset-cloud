@@ -1,19 +1,46 @@
-# Карта фич / бэклог срезов
+# Карта фич
 
-Один реестр для работы на ПК и для Cloud Agent.  
+Фича — верхний уровень. Внутри неё истории. Спека режется из истории, не из фичи целиком.
+
 Статусы: `draft` → `ready-for-speckit` → `specified` → `planned` → `in-impl` → `done` | `parked`.
 
-Перед запуском Spec Kit с телефона: статус `ready-for-speckit` (или дальше), пути заполнены, изменения **запушены** на GitHub.
+Бизнес-логика фичи лежит в её папке и из неё нарезаются истории.
 
-| id | Срез | Бизнес-постановка | Spec Kit | Статус | Примечание |
-|----|------|-------------------|----------|--------|------------|
-| F-001 | telegram-author-news-loop | `features/business-idea-from-news/` (FeatureLC / FeatureArtifacts) | `specs/001-telegram-author-news-loop/` | done | Учебный/первый контур TG |
-| F-002 | telegram-model-switch | `ProductArtifacts/model-switch-slice.md` | `specs/002-telegram-model-switch/` | in-impl | Ветка `002-telegram-model-switch`; довести и закрыть отдельно от нового флоу |
-| F-NEXT | *(следующая фича)* | *(путь к постановке)* | — | draft | Заполнить, когда постановка готова |
+## Бизнес-идея из новости
 
-## Как пользоваться
+Папка: `features/business-idea-from-news/`  
+Бизнес-логика: `features/business-idea-from-news/FeatureLC/04 Solution Validation/08 Business Logic Design/business-logic.md`  
+Статус фичи: `in-impl`. Истории текущего бота сделаны. Остальные истории этой фичи ждут мобильное приложение.
 
-1. На ПК проработала бизнес → файл постановки в `features/…` или `ProductArtifacts/`.
-2. Добавь/обнови строку здесь, статус `ready-for-speckit`, commit + push.
-3. Spec Kit (ПК или телефон): укажи **id** и пути из этой таблицы.
-4. После specify/plan/tasks/implement — обнови статус и путь `specs/…`.
+| История | Спека | Статус |
+|---|---|---|
+| Начать разбор со своей формулировки | `specs/001-telegram-author-news-loop/` | done |
+| Вести ход по скиллу: вопрос, слабый ответ не пускает, финал | `specs/001-telegram-author-news-loop/` | done |
+| Вернуться в незаконченный ход из списка | `specs/001-telegram-author-news-loop/` | done |
+| Записать сводку этого хода | `specs/001-telegram-author-news-loop/` | done |
+| Повтор той же реплики из Telegram не двигает шаг | `specs/001-telegram-author-news-loop/` | done |
+| Открыть прошлый разбор: сводка и диалог | — | parked |
+| Разобрать ту же тему ещё раз отдельной записью | — | parked |
+| Удалить один разбор | — | parked |
+
+Выбор модели и профиль навыка в эту фичу не входят. Они в «Настройке аккаунта».
+
+## Настройка аккаунта
+
+Папка: `features/account-settings/`  
+Бизнес-логика: `features/account-settings/business-logic.md`  
+Статус фичи: `ready-for-speckit`
+
+| История | Спека | Статус |
+|---|---|---|
+| Выбрать модель | `specs/002-telegram-model-switch/` | in-impl |
+| Открыть настройки с клавиатуры разбора | `ProductArtifacts/skill-profile-slice.md` | ready-for-speckit |
+| Прочитать, изменить и добавить информацию о себе | `ProductArtifacts/skill-profile-slice.md` | ready-for-speckit |
+| Обновлять скрытый файл профиля по результату задания | `ProductArtifacts/skill-profile-slice.md` | ready-for-speckit |
+
+Истории без папки `specs/` ещё не прошли `/speckit-specify`. Их общая граница — `ProductArtifacts/skill-profile-slice.md`.
+
+## Подключение платных моделей
+
+Папка ещё не создана.  
+Статус фичи: `draft`. Историй нет. Место входа — те же настройки аккаунта, отдельной фичей и позже.
