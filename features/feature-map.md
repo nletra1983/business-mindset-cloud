@@ -35,7 +35,7 @@
 |---|---|---|
 | Выбрать модель | `specs/002-telegram-model-switch/` | in-impl |
 | Открыть настройки с клавиатуры разбора | `specs/003-open-settings-from-keyboard/` | done |
-| Прочитать, изменить и добавить информацию о себе | `specs/004-self-info-profile/` | specified |
+| Прочитать, изменить и добавить информацию о себе | `specs/004-self-info-profile/` | planned |
 | Обновлять скрытый файл профиля по результату задания | `ProductArtifacts/skill-profile-slice.md` | ready-for-speckit |
 
 Истории без папки `specs/` ещё не прошли `/speckit-specify`. Их общая граница — `ProductArtifacts/skill-profile-slice.md`.
