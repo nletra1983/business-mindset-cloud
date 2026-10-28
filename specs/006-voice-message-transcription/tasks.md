@@ -24,8 +24,8 @@
 
 **Purpose**: Подготовить voice-константы и тестовый каркас для новой ветки входящих сообщений.
 
-- [ ] T001 Добавить в `app/account_settings.py` текстовые константы recoverable-ответов для voice-flow (`Эта модель не разбирает голос.`, `Голос не разобран.`) и helpers для action-ответов.
-- [ ] T002 [P] Создать `tests/test_voice_messages.py` с каркасом сценариев US1-US3.
+- [X] T001 Добавить в `app/account_settings.py` текстовые константы recoverable-ответов для voice-flow (`Эта модель не разбирает голос.`, `Голос не разобран.`) и helpers для action-ответов.
+- [X] T002 [P] Создать `tests/test_voice_messages.py` с каркасом сценариев US1-US3.
 
 ---
 
@@ -35,10 +35,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Реализовать в `app/model_client.py` voice transcription interface с retry-повтором по правилам model-call и явной ошибкой неподдерживаемой voice-capability для моделей без подтверждённого voice-path.
-- [ ] T004 [P] Добавить в `app/telegram_poll.py` функции загрузки voice-файла из Telegram (`getFile` + download bytes) без сохранения audio на диск/в БД.
-- [ ] T005 В `app/telegram_poll.py` расширить входящий message route: поддержать `message.voice`, оставить `message.text` поведение неизменным, `audio`/`video_note` не обрабатывать как voice этой истории.
-- [ ] T006 В `app/telegram_poll.py` реализовать общий `_voice_message_actions(...)`: unsupported/empty outcomes не двигают шаг, recognized text сначала отправляется как отдельное сообщение, потом проходит через текущий text-flow.
+- [X] T003 Реализовать в `app/model_client.py` voice transcription interface с retry-повтором по правилам model-call и явной ошибкой неподдерживаемой voice-capability для моделей без подтверждённого voice-path.
+- [X] T004 [P] Добавить в `app/telegram_poll.py` функции загрузки voice-файла из Telegram (`getFile` + download bytes) без сохранения audio на диск/в БД.
+- [X] T005 В `app/telegram_poll.py` расширить входящий message route: поддержать `message.voice`, оставить `message.text` поведение неизменным, `audio`/`video_note` не обрабатывать как voice этой истории.
+- [X] T006 В `app/telegram_poll.py` реализовать общий `_voice_message_actions(...)`: unsupported/empty outcomes не двигают шаг, recognized text сначала отправляется как отдельное сообщение, потом проходит через текущий text-flow.
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -52,13 +52,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T007 [P] [US1] Дописать `tests/test_voice_messages.py`: при `message.voice` и валидном распознавании `_dispatch` отправляет распознанный текст отдельным сообщением и затем вызывает существующий text path.
-- [ ] T008 [P] [US1] Дописать `tests/test_voice_messages.py`: profile-edit step (`read_profile_edit_step != idle`) обрабатывает распознанный текст теми же profile rules, что и typed text.
+- [X] T007 [P] [US1] Дописать `tests/test_voice_messages.py`: при `message.voice` и валидном распознавании `_dispatch` отправляет распознанный текст отдельным сообщением и затем вызывает существующий text path.
+- [X] T008 [P] [US1] Дописать `tests/test_voice_messages.py`: profile-edit step (`read_profile_edit_step != idle`) обрабатывает распознанный текст теми же profile rules, что и typed text.
 
 ### Implementation for User Story 1
 
-- [ ] T009 [US1] В `app/telegram_poll.py` подключить recognized text к существующим вызовам `_profile_message_actions(...)` и `handle_text(...)`, не создавая отдельный run-flow.
-- [ ] T010 [US1] В `app/telegram_poll.py` гарантировать, что распознанный текст отправляется отдельным bot message без дополнительной подписи.
+- [X] T009 [US1] В `app/telegram_poll.py` подключить recognized text к существующим вызовам `_profile_message_actions(...)` и `handle_text(...)`, не создавая отдельный run-flow.
+- [X] T010 [US1] В `app/telegram_poll.py` гарантировать, что распознанный текст отправляется отдельным bot message без дополнительной подписи.
 
 **Checkpoint**: User Story 1 is fully functional and independently testable
 
@@ -72,13 +72,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T011 [P] [US2] Дописать `tests/test_voice_messages.py`: unsupported model возвращает `Эта модель не разбирает голос.` без вызовов `handle_text(...)`/profile writes.
-- [ ] T012 [P] [US2] Дописать `tests/test_voice_messages.py`: `audio` и `video_note` не проходят через voice pipeline этой истории.
+- [X] T011 [P] [US2] Дописать `tests/test_voice_messages.py`: unsupported model возвращает `Эта модель не разбирает голос.` без вызовов `handle_text(...)`/profile writes.
+- [X] T012 [P] [US2] Дописать `tests/test_voice_messages.py`: `audio` и `video_note` не проходят через voice pipeline этой истории.
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] В `app/model_client.py` и `app/telegram_poll.py` добавить явную unsupported ветку для моделей без подтверждённого voice-path.
-- [ ] T014 [US2] Проверить, что unsupported ветка не изменяет model state, run status и profile-edit step.
+- [X] T013 [US2] В `app/model_client.py` и `app/telegram_poll.py` добавить явную unsupported ветку для моделей без подтверждённого voice-path.
+- [X] T014 [US2] Проверить, что unsupported ветка не изменяет model state, run status и profile-edit step.
 
 **Checkpoint**: User Stories 1 and 2 both work independently
 
@@ -92,13 +92,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T015 [P] [US3] Дописать `tests/test_voice_messages.py`: empty transcription возвращает `Голос не разобран.` и не двигает шаг.
-- [ ] T016 [P] [US3] Дописать `tests/test_voice_messages.py`: duplicate update behavior для voice остаётся защищённым существующим dedup path.
+- [X] T015 [P] [US3] Дописать `tests/test_voice_messages.py`: empty transcription возвращает `Голос не разобран.` и не двигает шаг.
+- [X] T016 [P] [US3] Дописать `tests/test_voice_messages.py`: duplicate update behavior для voice остаётся защищённым существующим dedup path.
 
 ### Implementation for User Story 3
 
-- [ ] T017 [US3] В `app/telegram_poll.py` добавить обработку empty transcription как recoverable outcome с нулевым влиянием на шаги.
-- [ ] T018 [US3] В `app/telegram_poll.py` убедиться, что ошибка загрузки/распознавания voice не пробрасывает state-changing side effects.
+- [X] T017 [US3] В `app/telegram_poll.py` добавить обработку empty transcription как recoverable outcome с нулевым влиянием на шаги.
+- [X] T018 [US3] В `app/telegram_poll.py` убедиться, что ошибка загрузки/распознавания voice не пробрасывает state-changing side effects.
 
 **Checkpoint**: All user stories are independently functional and state-safe
 
@@ -108,9 +108,9 @@
 
 **Purpose**: Финальная валидация и синхронизация с quickstart.
 
-- [ ] T019 [P] Запустить `python3 -m pytest tests/test_voice_messages.py tests/test_account_settings_state.py tests/test_self_info_profile.py tests/test_skill_gate.py` и сохранить вывод как артефакт.
-- [ ] T020 Запустить `python3 -m pytest tests` для регрессии и сохранить вывод как артефакт.
-- [ ] T021 Сверить `specs/006-voice-message-transcription/quickstart.md` с фактическим покрытием тестов и обновить quickstart при расхождении.
+- [X] T019 [P] Запустить `python3 -m pytest tests/test_voice_messages.py tests/test_account_settings_state.py tests/test_self_info_profile.py tests/test_skill_gate.py` и сохранить вывод как артефакт.
+- [X] T020 Запустить `python3 -m pytest tests` для регрессии и сохранить вывод как артефакт.
+- [X] T021 Сверить `specs/006-voice-message-transcription/quickstart.md` с фактическим покрытием тестов и обновить quickstart при расхождении.
 
 ---
 
