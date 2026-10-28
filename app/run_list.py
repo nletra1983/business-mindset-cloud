@@ -1,16 +1,16 @@
-from app.model_switch import MODEL_CALLBACK
+from app.model_switch import MODEL_CALLBACK, model_label
 from app.run_flow import EXIT_LABEL, continue_prompt, focus, leave_window, open_runs
 
 
-def exit_row() -> list[dict]:
+def exit_row(current_model: str) -> list[dict]:
     return [
         {"text": EXIT_LABEL, "callback_data": "to_list"},
-        {"text": "модель", "callback_data": MODEL_CALLBACK},
+        {"text": model_label(current_model), "callback_data": MODEL_CALLBACK},
     ]
 
 
-def exit_keyboard() -> dict:
-    return {"inline_keyboard": [exit_row()]}
+def exit_keyboard(current_model: str) -> dict:
+    return {"inline_keyboard": [exit_row(current_model)]}
 
 
 def show_list(conn, person_id) -> list[dict]:

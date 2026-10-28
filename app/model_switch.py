@@ -2,7 +2,15 @@ from app.config import MODELS
 
 UNAVAILABLE = "Выбранная модель недоступна."
 PICK_TEXT = "Выбери модель."
+CHANGED = "Модель изменена."
 MODEL_CALLBACK = "model"
+
+
+def model_label(model_id: str) -> str:
+    for item in MODELS:
+        if item["id"] == model_id:
+            return item["label"]
+    return "DeepSeek"
 
 
 def is_model_id(model_id: str) -> bool:
@@ -26,6 +34,10 @@ def apply_fallback(person: dict, run: dict | None) -> None:
 
 def note_answered(person: dict, requested_id: str) -> None:
     person["last_answered_model"] = requested_id
+
+
+def after_choice(message_id: int) -> dict:
+    return {"kind": "plain_edit", "text": CHANGED, "message_id": message_id}
 
 
 def model_keyboard(current_model: str) -> dict:

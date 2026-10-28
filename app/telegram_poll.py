@@ -8,6 +8,7 @@ from app.db import apply_schema, connect
 from app.model_switch import (
     MODEL_CALLBACK,
     PICK_TEXT,
+    after_choice,
     apply_choice,
     is_model_id,
     model_keyboard,
@@ -62,7 +63,7 @@ def _dispatch(conn, update: dict) -> None:
             int(message["message_id"]),
             message["text"],
         )
-        _perform(message["chat"]["id"], actions)
+        _perform(message["chat"]["id"], actions, _current_model(conn, person["id"]))
         return
     if "callback_query" not in update:
         return
@@ -81,13 +82,17 @@ def _dispatch(conn, update: dict) -> None:
         state = read_model_state(conn, person["id"])
         actions = [{"kind": "models", "text": PICK_TEXT, "current": state["current_model"]}]
     elif data.startswith("m:"):
-        current = _choose(conn, person["id"], data[2:])
-        actions = [{"kind": "models", "text": PICK_TEXT, "current": current}]
+        _choose(conn, person["id"], data[2:])
+        actions = [after_choice(int(message["message_id"]))]
     elif data.startswith("r:"):
         actions = resume(conn, person["id"], data[2:])
     else:
         actions = []
-    _perform(chat["id"], actions)
+    _perform(chat["id"], actions, _current_model(conn, person["id"]))
+
+
+def _current_model(conn, person_id) -> str:
+    return read_model_state(conn, person_id)["current_model"]
 
 
 def _choose(conn, person_id, model_id: str) -> str:
@@ -104,19 +109,32 @@ def _choose(conn, person_id, model_id: str) -> str:
     return state["current_model"]
 
 
-def _perform(chat_id: int, actions: list[dict]) -> None:
+def _perform(chat_id: int, actions: list[dict], current_model: str) -> None:
     for action in actions:
         kind = action["kind"]
         if kind == "pin":
             _call("pinChatMessage", {"chat_id": chat_id, "message_id": action["message_id"]})
         elif kind == "list":
-            markup = {"inline_keyboard": action["buttons"]} if action["buttons"] else exit_keyboard()
+            markup = {"inline_keyboard": action["buttons"]} if action["buttons"] else exit_keyboard(current_model)
             if action["buttons"]:
-                markup["inline_keyboard"].append(exit_row())
+                markup["inline_keyboard"].append(exit_row(current_model))
             _call(
                 "sendMessage",
                 {"chat_id": chat_id, "text": action["text"], "reply_markup": markup},
             )
+        elif kind == "plain_edit":
+            try:
+                _call(
+                    "editMessageText",
+                    {
+                        "chat_id": chat_id,
+                        "message_id": action["message_id"],
+                        "text": action["text"],
+                        "reply_markup": {"inline_keyboard": []},
+                    },
+                )
+            except httpx.HTTPError:
+                _call("sendMessage", {"chat_id": chat_id, "text": action["text"]})
         elif kind == "models":
             _call(
                 "sendMessage",
@@ -132,7 +150,7 @@ def _perform(chat_id: int, actions: list[dict]) -> None:
                 {
                     "chat_id": chat_id,
                     "text": action["text"],
-                    "reply_markup": exit_keyboard(),
+                    "reply_markup": exit_keyboard(current_model),
                 },
             )
 
