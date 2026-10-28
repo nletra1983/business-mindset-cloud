@@ -1,0 +1,12 @@
+---
+description: Бизнес на ПК, Spec Kit на ПК или Cloud; опираться на feature-map и bash-скрипты
+alwaysApply: true
+---
+
+# PC + Cloud Spec Kit
+
+- Реестр срезов: `features/feature-map.md`. Перед Spec Kit — актуальная строка и путь к бизнес-постановке.
+- Скрипты Spec Kit: только `.specify/scripts/bash/` (не powershell), если skill не говорит иное.
+- Cloud / телефон: читать только файлы репозитория; не предполагать локальный `D:\` вне git.
+- Дыры в постановке не закрывать молча — спросить пользователя.
+- После specify/plan/tasks/implement предложить обновить статус в `feature-map.md`.
