@@ -1,0 +1,28 @@
+name: Deploy bot
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-bot
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update the bot on Selectel
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -z "$SSH_KEY" ]; then
+            echo "DEPLOY_SSH_KEY is missing. Add the deploy private key in GitHub Actions secrets."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' '176.53.234.161 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILnQBw5/hd/atKzLcId73zr8l9C927Dmlfw/SQ0vuVBp' > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes root@176.53.234.161 /usr/local/sbin/deploy-business-mindset
