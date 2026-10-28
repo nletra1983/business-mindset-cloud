@@ -10,6 +10,7 @@ ACCESS_MODE = "service_free"
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 GIGACHAT_OAUTH_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 GIGACHAT_URL = "https://api.giga.chat/v1/chat/completions"
+GIGACHAT_STT_URL = "https://api.giga.chat/v1/audio/transcriptions"
 GIGACHAT_SCOPE = "GIGACHAT_API_PERS"
 GLM_URL = "https://api.z.ai/api/paas/v4/chat/completions"
 MODELS = (

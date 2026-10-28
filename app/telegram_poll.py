@@ -17,9 +17,12 @@ from app.account_settings import (
     profile_start_actions,
     recoverable_action,
     settings_menu_action,
+    voice_not_recognized_action,
+    voice_unsupported_action,
 )
 from app.config import telegram_base, telegram_token
 from app.db import apply_schema, connect
+from app.model_client import ModelDown, VoiceNotSupported, transcribe_voice
 from app.model_switch import (
     MODEL_CALLBACK,
     PICK_TEXT,
@@ -81,10 +84,17 @@ def _dispatch(conn, update: dict) -> None:
     if "message" in update:
         message = update["message"]
         user = message.get("from") or {}
-        if "id" not in user or "text" not in message:
+        if "id" not in user or ("text" not in message and "voice" not in message):
             return
         _typing(message["chat"]["id"])
         person = upsert_from_telegram(conn, int(user["id"]), user.get("username"))
+        if "voice" in message and "text" not in message:
+            actions = _voice_message_actions(conn, person, message)
+            if actions:
+                _perform(message["chat"]["id"], actions, _current_model(conn, person["id"]))
+            return
+        if "text" not in message:
+            return
         profile_actions = _profile_message_actions(conn, person["id"], message["text"])
         if profile_actions is not None:
             _perform(message["chat"]["id"], profile_actions, _current_model(conn, person["id"]))
@@ -185,6 +195,46 @@ def _profile_message_actions(conn, person_id, text: str) -> list[dict] | None:
     write_profile_edit_step(conn, person_id, "idle")
     conn.commit()
     return [recoverable_action()]
+
+
+def _voice_message_actions(conn, person: dict, message: dict) -> list[dict]:
+    voice = message.get("voice")
+    if not isinstance(voice, dict):
+        return []
+    model_id = _current_model(conn, person["id"])
+    if model_id != "GigaChat-2":
+        return [voice_unsupported_action()]
+    file_id = str(voice.get("file_id") or "").strip()
+    if not file_id:
+        return [voice_not_recognized_action()]
+    try:
+        voice_bytes = _download_voice_bytes(file_id)
+        recognized_text = transcribe_voice(model_id, voice_bytes)
+    except VoiceNotSupported:
+        return [voice_unsupported_action()]
+    except (ModelDown, httpx.HTTPError):
+        return [voice_not_recognized_action()]
+
+    text = recognized_text.strip()
+    if not text:
+        return [voice_not_recognized_action()]
+
+    actions = [{"kind": "text", "text": text}]
+    profile_actions = _profile_message_actions(conn, person["id"], text)
+    if profile_actions is not None:
+        actions.extend(profile_actions)
+        return actions
+
+    actions.extend(
+        handle_text(
+            conn,
+            person,
+            int(message["chat"]["id"]),
+            int(message["message_id"]),
+            text,
+        )
+    )
+    return actions
 
 
 def _choose(conn, person_id, model_id: str) -> str:
@@ -293,6 +343,25 @@ def _url(method: str) -> str:
     if base.endswith("/bot"):
         return f"{base}{token}/{method}"
     return f"{base}/bot{token}/{method}"
+
+
+def _file_url(file_path: str) -> str:
+    base = telegram_base()
+    token = telegram_token()
+    normalized = file_path.lstrip("/")
+    if base.endswith("/bot"):
+        return f"{base[:-4]}/file/bot{token}/{normalized}"
+    return f"{base}/file/bot{token}/{normalized}"
+
+
+def _download_voice_bytes(file_id: str) -> bytes:
+    body = _call("getFile", {"file_id": file_id})
+    file_path = ((body.get("result") or {}).get("file_path") or "").strip()
+    if not file_path:
+        raise httpx.HTTPError("missing telegram file_path")
+    response = httpx.get(_file_url(file_path), timeout=40.0)
+    response.raise_for_status()
+    return response.content
 
 
 def _seen(conn, update_id: int) -> bool:
