@@ -47,6 +47,7 @@ def test_open_settings_does_not_mutate_run_or_model_state(monkeypatch):
         "app.telegram_poll.write_open_run_model",
         lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("write_open_run_model should not be called")),
     )
+    monkeypatch.setattr("app.telegram_poll.SqlBook.phone_label", lambda _self, _person_id: None)
 
     _dispatch(object(), _callback_update("settings"))
 
@@ -54,7 +55,7 @@ def test_open_settings_does_not_mutate_run_or_model_state(monkeypatch):
     assert captured["current_model"] == "deepseek-chat"
     assert len(actions) == 1
     assert actions[0]["kind"] == "settings_menu"
-    assert actions[0]["text"] == "Настройки аккаунта."
+    assert actions[0]["text"] == "Настройки аккаунта.\nТелефон: не указан."
 
 
 def test_stale_settings_callback_returns_recoverable_message_without_writes(monkeypatch):

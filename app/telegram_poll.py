@@ -4,19 +4,37 @@ import time
 import httpx
 
 from app.account_settings import (
+    CODE_FAILED,
+    CODE_REJECTED,
+    CODE_SENT,
+    ENTRANCE_CONFIRMED,
+    ENTRANCES_MERGED,
+    PHONE_BAD,
+    PHONE_PROMPT,
     PROFILE_FACT_PROMPT,
     PROFILE_FACT_RETRY,
     PROFILE_STRENGTHS_RETRY,
     PROFILE_WEAKNESSES_PROMPT,
     PROFILE_WEAKNESSES_RETRY,
+    SECOND_STILL_OPEN,
     SETTINGS_CALLBACK,
     SETTINGS_MODEL_CALLBACK,
+    SETTINGS_PHONE_CALLBACK,
     SETTINGS_PREFIX,
     SETTINGS_PROFILE_CALLBACK,
+    SETTINGS_TELEGRAM_CALLBACK,
+    TELEGRAM_BAD,
+    TELEGRAM_PROMPT,
     profile_saved_actions,
     profile_start_actions,
     recoverable_action,
     settings_menu_action,
+)
+from app.entrances import (
+    SqlBook,
+    begin_settings_phone,
+    begin_settings_telegram,
+    confirm_any_settings_code,
 )
 from app.config import telegram_base, telegram_token
 from app.db import apply_schema, connect
@@ -33,6 +51,7 @@ from app.person import (
     PROFILE_AWAITING_STRENGTHS,
     PROFILE_AWAITING_WEAKNESSES,
     append_visible_fact,
+    read_kept_profile_texts,
     read_model_state,
     read_profile_edit_step,
     read_visible_profile,
@@ -129,15 +148,25 @@ def _current_model(conn, person_id) -> str:
 
 def _settings_actions(conn, person_id, data: str) -> list[dict]:
     if data == SETTINGS_CALLBACK:
-        return [settings_menu_action()]
+        phone = SqlBook(conn).phone_label(person_id)
+        return [settings_menu_action(phone)]
     if data == SETTINGS_MODEL_CALLBACK or data == MODEL_CALLBACK:
         state = read_model_state(conn, person_id)
         return [{"kind": "models", "text": PICK_TEXT, "current": state["current_model"]}]
+    if data == SETTINGS_PHONE_CALLBACK:
+        write_profile_edit_step(conn, person_id, "awaiting_phone")
+        conn.commit()
+        return [{"kind": "text", "text": PHONE_PROMPT}]
+    if data == SETTINGS_TELEGRAM_CALLBACK:
+        write_profile_edit_step(conn, person_id, "awaiting_telegram")
+        conn.commit()
+        return [{"kind": "text", "text": TELEGRAM_PROMPT}]
     if data == SETTINGS_PROFILE_CALLBACK:
         profile = read_visible_profile(conn, person_id)
+        extras = read_kept_profile_texts(conn, person_id)
         write_profile_edit_step(conn, person_id, PROFILE_AWAITING_STRENGTHS)
         conn.commit()
-        return profile_start_actions(profile)
+        return profile_start_actions(profile, extras)
     if data.startswith(SETTINGS_PREFIX):
         return [recoverable_action()]
     return []
@@ -145,6 +174,9 @@ def _settings_actions(conn, person_id, data: str) -> list[dict]:
 
 def _profile_message_actions(conn, person_id, text: str) -> list[dict] | None:
     step = read_profile_edit_step(conn, person_id)
+    entrance = _entrance_message_actions(conn, person_id, step, text)
+    if entrance is not None:
+        return entrance
     if step == "idle":
         return None
 
@@ -185,6 +217,43 @@ def _profile_message_actions(conn, person_id, text: str) -> list[dict] | None:
     write_profile_edit_step(conn, person_id, "idle")
     conn.commit()
     return [recoverable_action()]
+
+
+def _entrance_message_actions(conn, person_id, step: str, text: str) -> list[dict] | None:
+    if step not in {"awaiting_phone", "awaiting_telegram", "awaiting_link_code"}:
+        return None
+    book = SqlBook(conn)
+    if step == "awaiting_phone":
+        result = begin_settings_phone(book, person_id, text)
+        if not result["ok"] and result["reason"] == "sms":
+            write_profile_edit_step(conn, person_id, "idle")
+            conn.commit()
+            return [{"kind": "text", "text": CODE_FAILED}]
+        if not result["ok"]:
+            return [{"kind": "text", "text": PHONE_BAD}]
+        write_profile_edit_step(conn, person_id, "awaiting_link_code")
+        conn.commit()
+        return [{"kind": "text", "text": CODE_SENT}]
+    if step == "awaiting_telegram":
+        result = begin_settings_telegram(book, person_id, text)
+        if not result["ok"] and result["reason"] == "delivery":
+            write_profile_edit_step(conn, person_id, "idle")
+            conn.commit()
+            return [{"kind": "text", "text": CODE_FAILED}]
+        if not result["ok"]:
+            return [{"kind": "text", "text": TELEGRAM_BAD}]
+        write_profile_edit_step(conn, person_id, "awaiting_link_code")
+        conn.commit()
+        return [{"kind": "text", "text": CODE_SENT}]
+    result = confirm_any_settings_code(book, person_id, text)
+    if not result["ok"]:
+        return [{"kind": "text", "text": CODE_REJECTED}]
+    write_profile_edit_step(conn, person_id, "idle" if not result.get("waiting") else "awaiting_link_code")
+    conn.commit()
+    if result.get("waiting"):
+        return [{"kind": "text", "text": SECOND_STILL_OPEN}]
+    note = ENTRANCES_MERGED if result.get("merged") else ENTRANCE_CONFIRMED
+    return [{"kind": "text", "text": note}]
 
 
 def _choose(conn, person_id, model_id: str) -> str:

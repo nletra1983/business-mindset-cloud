@@ -171,6 +171,30 @@ def _normalize_facts(raw) -> list[str]:
     return [str(raw)] if str(raw).strip() else []
 
 
+def read_kept_profile_texts(conn, person_id) -> list[dict]:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT strengths_text, weaknesses_text, self_facts
+            FROM kept_profile_text
+            WHERE person_id = %s
+            ORDER BY created_at ASC, id ASC
+            """,
+            (person_id,),
+        )
+        rows = cur.fetchall()
+    texts = []
+    for row in rows:
+        texts.append(
+            {
+                "strengths_text": row[0] or "",
+                "weaknesses_text": row[1] or "",
+                "self_facts": _normalize_facts(row[2]),
+            }
+        )
+    return texts
+
+
 def read_visible_profile(conn, person_id) -> dict:
     with conn.cursor() as cur:
         cur.execute(
