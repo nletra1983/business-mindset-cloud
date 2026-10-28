@@ -1,11 +1,11 @@
-from app.model_switch import MODEL_CALLBACK, model_label
+from app.account_settings import settings_button
 from app.run_flow import EXIT_LABEL, continue_prompt, focus, leave_window, open_runs
 
 
-def exit_row(current_model: str) -> list[dict]:
+def exit_row(_current_model: str) -> list[dict]:
     return [
         {"text": EXIT_LABEL, "callback_data": "to_list"},
-        {"text": model_label(current_model), "callback_data": MODEL_CALLBACK},
+        settings_button(),
     ]
 
 

@@ -29,12 +29,12 @@ def test_after_choice_is_text_only():
     assert "current" not in action
 
 
-def test_opener_button_shows_current_model_name():
-    deepseek = exit_row("deepseek-chat")[1]
-    gigachat = exit_row("GigaChat-2")[1]
-    glm = exit_row("glm-5.3-flash")[1]
-    assert deepseek["text"] == "DeepSeek"
-    assert gigachat["text"] == "GigaChat"
-    assert glm["text"] == "GLM"
-    assert deepseek["callback_data"] == gigachat["callback_data"] == glm["callback_data"] == "model"
-    assert all("<" not in button["text"] for button in (deepseek, gigachat, glm))
+def test_opener_button_shows_settings_entry():
+    first = exit_row("deepseek-chat")[1]
+    second = exit_row("GigaChat-2")[1]
+    third = exit_row("glm-5.3-flash")[1]
+    assert first["text"] == "настройки"
+    assert second["text"] == "настройки"
+    assert third["text"] == "настройки"
+    assert first["callback_data"] == second["callback_data"] == third["callback_data"] == "settings"
+    assert all("<" not in button["text"] for button in (first, second, third))

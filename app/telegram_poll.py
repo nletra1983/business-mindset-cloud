@@ -3,6 +3,15 @@ import time
 
 import httpx
 
+from app.account_settings import (
+    SETTINGS_CALLBACK,
+    SETTINGS_MODEL_CALLBACK,
+    SETTINGS_PREFIX,
+    SETTINGS_PROFILE_CALLBACK,
+    profile_entry_action,
+    recoverable_action,
+    settings_menu_action,
+)
 from app.config import telegram_base, telegram_token
 from app.db import apply_schema, connect
 from app.model_switch import (
@@ -78,9 +87,8 @@ def _dispatch(conn, update: dict) -> None:
     person = upsert_from_telegram(conn, int(user["id"]), user.get("username"))
     if data == "to_list":
         actions = show_list(conn, person["id"])
-    elif data == MODEL_CALLBACK:
-        state = read_model_state(conn, person["id"])
-        actions = [{"kind": "models", "text": PICK_TEXT, "current": state["current_model"]}]
+    elif data == MODEL_CALLBACK or data == SETTINGS_CALLBACK or data.startswith(SETTINGS_PREFIX):
+        actions = _settings_actions(conn, person["id"], data)
     elif data.startswith("m:"):
         _choose(conn, person["id"], data[2:])
         actions = [after_choice(int(message["message_id"]))]
@@ -93,6 +101,19 @@ def _dispatch(conn, update: dict) -> None:
 
 def _current_model(conn, person_id) -> str:
     return read_model_state(conn, person_id)["current_model"]
+
+
+def _settings_actions(conn, person_id, data: str) -> list[dict]:
+    if data == SETTINGS_CALLBACK:
+        return [settings_menu_action()]
+    if data == SETTINGS_MODEL_CALLBACK or data == MODEL_CALLBACK:
+        state = read_model_state(conn, person_id)
+        return [{"kind": "models", "text": PICK_TEXT, "current": state["current_model"]}]
+    if data == SETTINGS_PROFILE_CALLBACK:
+        return [profile_entry_action()]
+    if data.startswith(SETTINGS_PREFIX):
+        return [recoverable_action()]
+    return []
 
 
 def _choose(conn, person_id, model_id: str) -> str:
@@ -142,6 +163,15 @@ def _perform(chat_id: int, actions: list[dict], current_model: str) -> None:
                     "chat_id": chat_id,
                     "text": action["text"],
                     "reply_markup": model_keyboard(action["current"]),
+                },
+            )
+        elif kind == "settings_menu":
+            _call(
+                "sendMessage",
+                {
+                    "chat_id": chat_id,
+                    "text": action["text"],
+                    "reply_markup": {"inline_keyboard": action["buttons"]},
                 },
             )
         else:
