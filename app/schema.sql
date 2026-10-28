@@ -83,3 +83,54 @@ CREATE TABLE IF NOT EXISTS profile_edit_session (
         step IN ('idle', 'awaiting_strengths', 'awaiting_weaknesses', 'awaiting_extra_fact')
     )
 );
+
+CREATE TABLE IF NOT EXISTS hidden_profile (
+    person_id uuid PRIMARY KEY REFERENCES person (id),
+    spotting_status text NOT NULL DEFAULT 'не наблюдалось',
+    creativity_status text NOT NULL DEFAULT 'не наблюдалось',
+    valuing_status text NOT NULL DEFAULT 'не наблюдалось',
+    uncertainty_status text NOT NULL DEFAULT 'не наблюдалось',
+    resources_status text NOT NULL DEFAULT 'не наблюдалось',
+    learning_status text NOT NULL DEFAULT 'не наблюдалось',
+    current_focus text NOT NULL DEFAULT 'spotting',
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT hidden_profile_spotting_status_check CHECK (
+        spotting_status IN ('не наблюдалось', 'проявляется', 'слабо', 'устойчиво', 'неравномерно')
+    ),
+    CONSTRAINT hidden_profile_creativity_status_check CHECK (
+        creativity_status IN ('не наблюдалось', 'проявляется', 'слабо', 'устойчиво', 'неравномерно')
+    ),
+    CONSTRAINT hidden_profile_valuing_status_check CHECK (
+        valuing_status IN ('не наблюдалось', 'проявляется', 'слабо', 'устойчиво', 'неравномерно')
+    ),
+    CONSTRAINT hidden_profile_uncertainty_status_check CHECK (
+        uncertainty_status IN ('не наблюдалось', 'проявляется', 'слабо', 'устойчиво', 'неравномерно')
+    ),
+    CONSTRAINT hidden_profile_resources_status_check CHECK (
+        resources_status IN ('не наблюдалось', 'проявляется', 'слабо', 'устойчиво', 'неравномерно')
+    ),
+    CONSTRAINT hidden_profile_learning_status_check CHECK (
+        learning_status IN ('не наблюдалось', 'проявляется', 'слабо', 'устойчиво', 'неравномерно')
+    ),
+    CONSTRAINT hidden_profile_current_focus_check CHECK (
+        current_focus IN ('spotting', 'creativity', 'valuing', 'uncertainty', 'resources', 'learning')
+    )
+);
+
+CREATE TABLE IF NOT EXISTS hidden_profile_evidence (
+    id uuid PRIMARY KEY,
+    person_id uuid NOT NULL REFERENCES person (id),
+    run_id uuid NOT NULL REFERENCES run (id),
+    exercise_id text NOT NULL,
+    characteristic_id text NOT NULL,
+    signal text NOT NULL,
+    quote_or_paraphrase text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT hidden_profile_evidence_characteristic_check CHECK (
+        characteristic_id IN ('spotting', 'creativity', 'valuing', 'uncertainty', 'resources', 'learning')
+    ),
+    CONSTRAINT hidden_profile_evidence_signal_check CHECK (
+        signal IN ('проявляется', 'слабо')
+    ),
+    CONSTRAINT hidden_profile_evidence_unique_run_characteristic UNIQUE (run_id, characteristic_id)
+);

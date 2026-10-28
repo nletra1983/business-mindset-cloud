@@ -6,6 +6,39 @@ PROFILE_AWAITING_STRENGTHS = "awaiting_strengths"
 PROFILE_AWAITING_WEAKNESSES = "awaiting_weaknesses"
 PROFILE_AWAITING_EXTRA_FACT = "awaiting_extra_fact"
 
+STATUS_NOT_OBSERVED = "не наблюдалось"
+STATUS_SHOWING = "проявляется"
+STATUS_WEAK = "слабо"
+STATUS_STABLE = "устойчиво"
+STATUS_UNEVEN = "неравномерно"
+
+SIGNAL_STATUSES = (STATUS_SHOWING, STATUS_WEAK)
+PROFILE_STATUSES = (
+    STATUS_NOT_OBSERVED,
+    STATUS_SHOWING,
+    STATUS_WEAK,
+    STATUS_STABLE,
+    STATUS_UNEVEN,
+)
+HIDDEN_CHARACTERISTICS = (
+    "spotting",
+    "creativity",
+    "valuing",
+    "uncertainty",
+    "resources",
+    "learning",
+)
+SMOKE_SKILL_SUFFIX = ".smoke"
+
+_STATUS_FIELD_BY_CHARACTERISTIC = {
+    "spotting": "spotting_status",
+    "creativity": "creativity_status",
+    "valuing": "valuing_status",
+    "uncertainty": "uncertainty_status",
+    "resources": "resources_status",
+    "learning": "learning_status",
+}
+
 
 def upsert_from_telegram(conn, telegram_user_id: int, username: str | None) -> dict:
     with conn.cursor() as cur:
@@ -220,4 +253,165 @@ def write_profile_edit_step(conn, person_id, step: str) -> None:
             DO UPDATE SET step = EXCLUDED.step, updated_at = now()
             """,
             (person_id, step),
+        )
+
+
+def status_from_signals(signals: list[str]) -> str:
+    normalized = [item for item in signals if item in SIGNAL_STATUSES]
+    if not normalized:
+        return STATUS_NOT_OBSERVED
+    if len(normalized) == 1:
+        return normalized[0]
+    first = normalized[0]
+    if all(item == first for item in normalized):
+        return STATUS_STABLE
+    return STATUS_UNEVEN
+
+
+def choose_current_focus(statuses: dict[str, str]) -> str:
+    for preferred in (STATUS_WEAK, STATUS_UNEVEN, STATUS_NOT_OBSERVED):
+        for characteristic_id in HIDDEN_CHARACTERISTICS:
+            if statuses.get(characteristic_id) == preferred:
+                return characteristic_id
+    for characteristic_id in HIDDEN_CHARACTERISTICS:
+        if statuses.get(characteristic_id) in PROFILE_STATUSES:
+            return characteristic_id
+    return "spotting"
+
+
+def _default_hidden_profile() -> dict[str, str]:
+    return {characteristic_id: STATUS_NOT_OBSERVED for characteristic_id in HIDDEN_CHARACTERISTICS}
+
+
+def _ensure_hidden_profile(conn, person_id) -> None:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO hidden_profile (person_id)
+            VALUES (%s)
+            ON CONFLICT (person_id) DO NOTHING
+            """,
+            (person_id,),
+        )
+
+
+def _read_hidden_profile_from_cursor(cur, person_id) -> dict[str, str]:
+    cur.execute(
+        """
+        SELECT spotting_status, creativity_status, valuing_status, uncertainty_status,
+               resources_status, learning_status, current_focus
+        FROM hidden_profile
+        WHERE person_id = %s
+        """,
+        (person_id,),
+    )
+    row = cur.fetchone()
+    statuses = _default_hidden_profile()
+    if row is None:
+        return statuses
+    values = row[:6]
+    for index, characteristic_id in enumerate(HIDDEN_CHARACTERISTICS):
+        if values[index] in PROFILE_STATUSES:
+            statuses[characteristic_id] = values[index]
+    return statuses
+
+
+def read_hidden_profile(conn, person_id) -> dict[str, str]:
+    _ensure_hidden_profile(conn, person_id)
+    with conn.cursor() as cur:
+        statuses = _read_hidden_profile_from_cursor(cur, person_id)
+    return statuses
+
+
+def _signals_for_characteristic(cur, person_id, characteristic_id: str) -> list[str]:
+    cur.execute(
+        """
+        SELECT signal
+        FROM hidden_profile_evidence
+        WHERE person_id = %s AND characteristic_id = %s
+        ORDER BY created_at ASC, id ASC
+        """,
+        (person_id, characteristic_id),
+    )
+    rows = cur.fetchall() or []
+    return [row[0] for row in rows if row and row[0] in SIGNAL_STATUSES]
+
+
+def apply_hidden_profile_observations(
+    conn,
+    person_id,
+    run_id,
+    exercise_id: str,
+    observations: list[dict],
+) -> None:
+    if not observations:
+        return
+    _ensure_hidden_profile(conn, person_id)
+    applied = False
+    with conn.cursor() as cur:
+        for raw in observations:
+            characteristic_id = str(raw.get("characteristic_id") or "").strip()
+            signal = str(raw.get("signal") or "").strip()
+            quote = str(raw.get("quote_or_paraphrase") or "").strip() or "нет цитаты"
+            if characteristic_id not in HIDDEN_CHARACTERISTICS:
+                raise ValueError(f"unsupported characteristic_id: {characteristic_id}")
+            if signal not in SIGNAL_STATUSES:
+                raise ValueError(f"unsupported signal: {signal}")
+            if exercise_id.endswith(SMOKE_SKILL_SUFFIX) and characteristic_id != "spotting":
+                continue
+
+            cur.execute(
+                """
+                SELECT 1
+                FROM hidden_profile_evidence
+                WHERE run_id = %s AND characteristic_id = %s
+                """,
+                (run_id, characteristic_id),
+            )
+            if cur.fetchone() is not None:
+                continue
+
+            cur.execute(
+                """
+                INSERT INTO hidden_profile_evidence (
+                    id, person_id, run_id, exercise_id, characteristic_id, signal, quote_or_paraphrase
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    uuid.uuid4(),
+                    person_id,
+                    run_id,
+                    exercise_id,
+                    characteristic_id,
+                    signal,
+                    quote,
+                ),
+            )
+
+            signals = _signals_for_characteristic(cur, person_id, characteristic_id)
+            status = status_from_signals(signals)
+            status_field = _STATUS_FIELD_BY_CHARACTERISTIC[characteristic_id]
+            cur.execute(
+                f"""
+                UPDATE hidden_profile
+                SET {status_field} = %s, updated_at = now()
+                WHERE person_id = %s
+                """,
+                (status, person_id),
+            )
+            applied = True
+
+        if not applied:
+            return
+
+        statuses = _read_hidden_profile_from_cursor(cur, person_id)
+        focus = choose_current_focus(statuses)
+        cur.execute(
+            """
+            UPDATE hidden_profile
+            SET current_focus = %s, updated_at = now()
+            WHERE person_id = %s
+            """,
+            (focus, person_id),
         )

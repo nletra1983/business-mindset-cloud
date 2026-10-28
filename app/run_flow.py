@@ -3,7 +3,16 @@ import uuid
 from app.config import ACCESS_MODE, MODEL_REQUESTED, SKILL_VERSION
 from app.deepseek import ModelDown, finale, judge_block
 from app.model_switch import UNAVAILABLE, apply_fallback, note_answered
-from app.person import has_any_run, read_model_state, set_accepting_new, write_model_state, write_open_run_model
+from app.person import (
+    STATUS_SHOWING,
+    STATUS_WEAK,
+    apply_hidden_profile_observations,
+    has_any_run,
+    read_model_state,
+    set_accepting_new,
+    write_model_state,
+    write_open_run_model,
+)
 from app.skill import MISSED_LINE, blank_topic, event_prompt, scale_prompt
 from app.summary import save_summary
 
@@ -119,6 +128,15 @@ def _finish(conn, run: dict) -> list[dict]:
         missed = f"{missed}\n{MISSED_LINE}".strip()
         spoken = f"{spoken}\n{MISSED_LINE}"
     save_summary(conn, run["id"], worked, weak, missed)
+    observations = _hidden_profile_observations(run, event_answer, scale_answer, worked, weak)
+    if observations:
+        apply_hidden_profile_observations(
+            conn,
+            run["person_id"],
+            run["id"],
+            run.get("skill_version") or "",
+            observations,
+        )
     with conn.cursor() as cur:
         _mark_answered(cur, run)
         cur.execute(
@@ -281,3 +299,33 @@ def _utter(cur, run_id, speaker: str, text: str, telegram_message_id) -> None:
 
 def _text(text: str) -> dict:
     return {"kind": "text", "text": text}
+
+
+def _hidden_profile_observations(
+    run: dict,
+    event_answer: str,
+    scale_answer: str,
+    worked: str,
+    weak: str,
+) -> list[dict]:
+    skill_version = str(run.get("skill_version") or "")
+    if not skill_version.endswith(".smoke"):
+        return []
+    signal = STATUS_SHOWING
+    weak_low = (weak or "").lower()
+    if "слабо" in weak_low and "событ" in weak_low:
+        signal = STATUS_WEAK
+    evidence = (
+        (event_answer or "").strip()
+        or (scale_answer or "").strip()
+        or (worked or "").strip()
+        or (weak or "").strip()
+        or str(run.get("topic_text") or "").strip()
+    )
+    return [
+        {
+            "characteristic_id": "spotting",
+            "signal": signal,
+            "quote_or_paraphrase": evidence or "нет цитаты",
+        }
+    ]
