@@ -66,7 +66,7 @@
 | Внедрить вход по email и необязательный Telegram в уже работающий аккаунт | `specs/007-email-account-entry/` | in-impl |
 | Войти в приложение по email и работать без Telegram | `specs/008-app-email-entry/` | in-impl |
 | В настройках указать второй вход, подтвердить его кодом и слить ходы | `specs/009-link-second-entrance/` | in-impl |
-| Начать разбор новости в приложении и вернуться в незаконченный | `features/mobile-app/app-news-run.md` | ready-for-speckit |
+| Начать разбор новости в приложении и вернуться в незаконченный | `specs/010-app-news-run/` | in-impl |
 | Открыть настройки того же входа: модель и информация о себе | `features/mobile-app/app-settings.md` | ready-for-speckit |
 | Войти по номеру телефона и коду из SMS | `specs/006-phone-account-entry/` | parked |
 | Научить скилл объединять текст профиля при слиянии | — | draft |
