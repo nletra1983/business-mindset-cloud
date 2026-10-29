@@ -1,0 +1,4 @@
+storePassword=put-store-password-here
+keyPassword=put-key-password-here
+keyAlias=businessmindset
+storeFile=C\:/path/to/businessmindset-upload.jks

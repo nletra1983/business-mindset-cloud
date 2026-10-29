@@ -12,3 +12,18 @@ dist/
 secrets/
 Thumbs.db
 .DS_Store
+
+# Flutter / Android author signing (never commit keys or APK)
+mobile/android/key.properties
+mobile/android/**/*.jks
+mobile/android/**/*.keystore
+mobile/**/*.apk
+mobile/**/*.aab
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/build/
+mobile/.idea/
+mobile/android/local.properties
+mobile/android/.gradle/
