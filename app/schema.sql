@@ -134,3 +134,43 @@ CREATE TABLE IF NOT EXISTS hidden_profile_evidence (
     ),
     CONSTRAINT hidden_profile_evidence_unique_run_characteristic UNIQUE (run_id, characteristic_id)
 );
+
+CREATE TABLE IF NOT EXISTS email_link (
+    id uuid PRIMARY KEY,
+    person_id uuid NOT NULL REFERENCES person (id),
+    email text NOT NULL UNIQUE,
+    confirmed boolean NOT NULL DEFAULT false,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS link_code (
+    id uuid PRIMARY KEY,
+    kind text NOT NULL,
+    destination text NOT NULL,
+    code text NOT NULL,
+    purpose text NOT NULL,
+    requester_person_id uuid NULL REFERENCES person (id),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT link_code_kind_check CHECK (kind IN ('email', 'telegram')),
+    CONSTRAINT link_code_purpose_check CHECK (purpose IN ('login', 'settings')),
+    CONSTRAINT link_code_destination_unique UNIQUE (kind, destination)
+);
+
+CREATE TABLE IF NOT EXISTS staged_link (
+    person_id uuid NOT NULL REFERENCES person (id),
+    kind text NOT NULL,
+    destination text NOT NULL,
+    confirmed boolean NOT NULL DEFAULT false,
+    PRIMARY KEY (person_id, kind),
+    CONSTRAINT staged_link_kind_check CHECK (kind IN ('email', 'telegram'))
+);
+
+CREATE TABLE IF NOT EXISTS kept_profile_text (
+    id uuid PRIMARY KEY,
+    person_id uuid NOT NULL REFERENCES person (id),
+    source_label text NOT NULL,
+    strengths_text text NOT NULL DEFAULT '',
+    weaknesses_text text NOT NULL DEFAULT '',
+    self_facts jsonb NOT NULL DEFAULT '[]'::jsonb,
+    created_at timestamptz NOT NULL DEFAULT now()
+);

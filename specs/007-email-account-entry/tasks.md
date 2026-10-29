@@ -12,12 +12,12 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Добавить таблицы email, кода и сохранённого текста профиля в `app/schema.sql`
+- [x] T001 Добавить таблицы email, кода и сохранённого текста профиля в `app/schema.sql`
 
 ## Phase 2: Foundational
 
-- [ ] T002 Вынести правила кода, письма и слияния отметок в `app/entrances.py`
-- [ ] T003 Подключить отправку кода без текста упражнения в `app/mail.py`
+- [x] T002 Вынести правила кода, письма и слияния отметок в `app/entrances.py`
+- [x] T003 Подключить отправку кода без текста упражнения в `app/mail.py`
 
 ## Phase 3: User Story 1 — вход по email (P1)
 
@@ -25,8 +25,8 @@
 
 **Independent Test**: `begin_email_login` и `confirm_email_login` в `tests/test_email_entrances.py`.
 
-- [ ] T004 [US1] Принять адрес и последний код в `app/entrances.py`
-- [ ] T005 [US1] Проверить вход, отказ и текст письма в `tests/test_email_entrances.py`
+- [x] T004 [US1] Принять адрес и последний код в `app/entrances.py`
+- [x] T005 [US1] Проверить вход, отказ и текст письма в `tests/test_email_entrances.py`
 
 ## Phase 4: User Story 2 — бот без email (P1)
 
@@ -34,8 +34,8 @@
 
 **Independent Test**: обычный текст бота не становится запросом email, схема не содержит вход по номеру.
 
-- [ ] T006 [US2] Не добавлять запрос email в текущий диалог бота
-- [ ] T007 [US2] Проверить это в `tests/test_email_entrances.py` и `tests/test_phone_entrances.py`
+- [x] T006 [US2] Не добавлять запрос email в текущий диалог бота
+- [x] T007 [US2] Проверить это в `tests/test_email_entrances.py` и `tests/test_phone_entrances.py`
 
 ## Phase 5: User Story 3 — правило слияния (P2)
 
@@ -43,13 +43,13 @@
 
 **Independent Test**: два человека, два кода, сравнение ходов, отметок и текстов.
 
-- [ ] T008 [US3] Слить ходы и отметки и сохранить оба текста в `app/entrances.py`
-- [ ] T009 [US3] Проверить отказ, ожидание второго кода и слияние в `tests/test_email_entrances.py`
+- [x] T008 [US3] Слить ходы и отметки и сохранить оба текста в `app/entrances.py`
+- [x] T009 [US3] Проверить отказ, ожидание второго кода и слияние в `tests/test_email_entrances.py`
 
 ## Phase 6: Polish
 
-- [ ] T010 Прогнать `py -3.12 -m pytest tests/test_email_entrances.py tests/test_phone_entrances.py tests/test_account_settings_entry.py`
-- [ ] T011 Отметить историю в `features/feature-map.md` как идущую в реализацию
+- [x] T010 Прогнать `py -3.12 -m pytest tests/test_email_entrances.py tests/test_phone_entrances.py tests/test_account_settings_entry.py`
+- [x] T011 Отметить историю в `features/feature-map.md` как идущую в реализацию
 
 ## Dependencies
 
