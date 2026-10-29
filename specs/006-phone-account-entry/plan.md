@@ -1,5 +1,7 @@
 # Implementation Plan: Вход с телефона без обязательного Telegram
 
+2026-10-29: не реализовывать. Номер в бэклоге, текущий вход приложения — email.
+
 **Branch**: `006-phone-account-entry` | **Date**: 2026-10-28 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/006-phone-account-entry/spec.md`

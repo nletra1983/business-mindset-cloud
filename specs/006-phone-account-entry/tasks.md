@@ -1,5 +1,7 @@
 # Tasks: Вход с телефона без обязательного Telegram
 
+2026-10-29: не выполнять. История в бэклоге, текущий вход приложения — email.
+
 **Input**: Design documents from `/specs/006-phone-account-entry/`
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/account-entrances.md, quickstart.md

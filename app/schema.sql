@@ -80,15 +80,7 @@ CREATE TABLE IF NOT EXISTS profile_edit_session (
     step text NOT NULL DEFAULT 'idle',
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT profile_edit_session_step_check CHECK (
-        step IN (
-            'idle',
-            'awaiting_strengths',
-            'awaiting_weaknesses',
-            'awaiting_extra_fact',
-            'awaiting_phone',
-            'awaiting_telegram',
-            'awaiting_link_code'
-        )
+        step IN ('idle', 'awaiting_strengths', 'awaiting_weaknesses', 'awaiting_extra_fact')
     )
 );
 
@@ -141,57 +133,4 @@ CREATE TABLE IF NOT EXISTS hidden_profile_evidence (
         signal IN ('проявляется', 'слабо')
     ),
     CONSTRAINT hidden_profile_evidence_unique_run_characteristic UNIQUE (run_id, characteristic_id)
-);
-
-CREATE TABLE IF NOT EXISTS phone_link (
-    id uuid PRIMARY KEY,
-    person_id uuid NOT NULL REFERENCES person (id),
-    phone text NOT NULL UNIQUE,
-    confirmed boolean NOT NULL DEFAULT false,
-    updated_at timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS link_code (
-    id uuid PRIMARY KEY,
-    kind text NOT NULL,
-    destination text NOT NULL,
-    code text NOT NULL,
-    purpose text NOT NULL,
-    requester_person_id uuid NULL REFERENCES person (id),
-    created_at timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT link_code_kind_check CHECK (kind IN ('phone', 'telegram')),
-    CONSTRAINT link_code_purpose_check CHECK (purpose IN ('login', 'settings')),
-    CONSTRAINT link_code_destination_unique UNIQUE (kind, destination)
-);
-
-CREATE TABLE IF NOT EXISTS staged_link (
-    person_id uuid NOT NULL REFERENCES person (id),
-    kind text NOT NULL,
-    destination text NOT NULL,
-    confirmed boolean NOT NULL DEFAULT false,
-    PRIMARY KEY (person_id, kind),
-    CONSTRAINT staged_link_kind_check CHECK (kind IN ('phone', 'telegram'))
-);
-
-CREATE TABLE IF NOT EXISTS kept_profile_text (
-    id uuid PRIMARY KEY,
-    person_id uuid NOT NULL REFERENCES person (id),
-    source_label text NOT NULL,
-    strengths_text text NOT NULL DEFAULT '',
-    weaknesses_text text NOT NULL DEFAULT '',
-    self_facts jsonb NOT NULL DEFAULT '[]'::jsonb,
-    created_at timestamptz NOT NULL DEFAULT now()
-);
-
-ALTER TABLE profile_edit_session DROP CONSTRAINT IF EXISTS profile_edit_session_step_check;
-ALTER TABLE profile_edit_session ADD CONSTRAINT profile_edit_session_step_check CHECK (
-    step IN (
-        'idle',
-        'awaiting_strengths',
-        'awaiting_weaknesses',
-        'awaiting_extra_fact',
-        'awaiting_phone',
-        'awaiting_telegram',
-        'awaiting_link_code'
-    )
 );

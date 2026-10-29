@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-28
 
-**Status**: Draft
+**Status**: Parked 2026-10-29. Вход по номеру перенесён в бэклог. Его место занял email (ADL-019). Эту спеку не реализовывать.
 
 **Input**: User description: "Мобильное приложение" — only the ready story «Внедрить вход с телефона и необязательный Telegram в уже работающий аккаунт». Boundary: `features/mobile-app/arch-change.md`.
 

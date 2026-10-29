@@ -7,22 +7,6 @@ SETTINGS_LABEL = "настройки"
 SETTINGS_TITLE = "Настройки аккаунта."
 SETTINGS_MODEL_LABEL = "выбор модели"
 SETTINGS_PROFILE_LABEL = "информация о себе"
-SETTINGS_PHONE_CALLBACK = "settings:phone"
-SETTINGS_PHONE_LABEL = "телефон"
-SETTINGS_TELEGRAM_CALLBACK = "settings:telegram"
-SETTINGS_TELEGRAM_LABEL = "Telegram"
-PHONE_PROMPT = "Пришли номер телефона."
-TELEGRAM_PROMPT = "Пришли идентификатор Telegram числом."
-CODE_SENT = "Код отправлен. Пришли код из сообщения."
-CODE_FAILED = "Код не отправлен."
-CODE_REJECTED = "Код не подошёл."
-PHONE_BAD = "Номер не разобран."
-TELEGRAM_BAD = "Идентификатор Telegram не разобран."
-PHONE_CONFIRMED = "Телефон подтверждён."
-ENTRANCE_CONFIRMED = "Вход подтверждён."
-ENTRANCES_MERGED = "Входы объединены."
-SECOND_STILL_OPEN = "Второй вход ещё не подтверждён."
-PHONE_EMPTY = "не указан"
 PROFILE_STRENGTHS_PROMPT = "Напиши сильные стороны о себе одним сообщением."
 PROFILE_WEAKNESSES_PROMPT = "Теперь напиши слабые стороны о себе одним сообщением."
 PROFILE_FACT_PROMPT = "Добавь один факт о себе. Если не хочешь добавлять, напиши «нет»."
@@ -46,16 +30,13 @@ def settings_menu_buttons() -> list[list[dict]]:
     return [
         [{"text": SETTINGS_MODEL_LABEL, "callback_data": SETTINGS_MODEL_CALLBACK}],
         [{"text": SETTINGS_PROFILE_LABEL, "callback_data": SETTINGS_PROFILE_CALLBACK}],
-        [{"text": SETTINGS_PHONE_LABEL, "callback_data": SETTINGS_PHONE_CALLBACK}],
-        [{"text": SETTINGS_TELEGRAM_LABEL, "callback_data": SETTINGS_TELEGRAM_CALLBACK}],
     ]
 
 
-def settings_menu_action(phone: str | None = None) -> dict:
-    shown = phone or PHONE_EMPTY
+def settings_menu_action() -> dict:
     return {
         "kind": "settings_menu",
-        "text": f"{SETTINGS_TITLE}\nТелефон: {shown}.",
+        "text": SETTINGS_TITLE,
         "buttons": settings_menu_buttons(),
     }
 
@@ -68,9 +49,9 @@ def recoverable_action() -> dict:
     return {"kind": "text", "text": RECOVERABLE_TEXT}
 
 
-def profile_start_actions(profile: dict, extras: list[dict] | None = None) -> list[dict]:
+def profile_start_actions(profile: dict) -> list[dict]:
     return [
-        {"kind": "text", "text": render_visible_profile(profile, extras)},
+        {"kind": "text", "text": render_visible_profile(profile)},
         {"kind": "text", "text": PROFILE_STRENGTHS_PROMPT},
     ]
 
@@ -83,7 +64,7 @@ def profile_saved_actions(profile: dict, fact_added: bool) -> list[dict]:
     ]
 
 
-def _profile_sections(profile: dict) -> str:
+def render_visible_profile(profile: dict) -> str:
     strengths = (profile.get("strengths_text") or "").strip() or "Пока не заполнено."
     weaknesses = (profile.get("weaknesses_text") or "").strip() or "Пока не заполнено."
     facts = profile.get("self_facts") or []
@@ -92,14 +73,8 @@ def _profile_sections(profile: dict) -> str:
     else:
         facts_block = "Пока не добавлено."
     return (
+        "Информация о себе.\n\n"
         f"Сильные стороны:\n{strengths}\n\n"
         f"Слабые стороны:\n{weaknesses}\n\n"
         f"Сказано человеком:\n{facts_block}"
     )
-
-
-def render_visible_profile(profile: dict, extras: list[dict] | None = None) -> str:
-    blocks = ["Информация о себе.\n\n" + _profile_sections(profile)]
-    for extra in extras or []:
-        blocks.append("Другой вход.\n\n" + _profile_sections(extra))
-    return "\n\n".join(blocks)

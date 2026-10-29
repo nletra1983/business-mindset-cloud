@@ -59,13 +59,14 @@
 
 Папка: `features/mobile-app/`  
 Бизнес-логика: `features/mobile-app/business-logic.md`  
-Статус фичи: `draft`. Архитектура принята: ADL-018. История внедрения в уже работающий аккаунт специфицирована. Остальные истории ждут её.
+Статус фичи: `ready-for-speckit`. Архитектура принята: ADL-018, уточнение ADL-019. Вход в приложение — email. Номер телефона в бэклоге. В Spec Kit уходит одна история за раз, первой — внедрение email в аккаунт. Она блокирует реализацию остальных. Чужую границу в спеку не брать.
 
 | История | Спека | Статус |
 |---|---|---|
-| Внедрить вход с телефона и необязательный Telegram в уже работающий аккаунт | `specs/006-phone-account-entry/` | in-impl |
-| Войти в приложение по телефону через SMS и работать без Telegram | `features/mobile-app/business-logic.md` | draft |
-| В настройках указать второй вход, подтвердить его кодом и слить ходы | `features/mobile-app/business-logic.md` | draft |
-| Продолжить незаконченный разбор новости в приложении | `features/mobile-app/business-logic.md` | draft |
-| Открыть настройки того же входа: модель и информация о себе | `features/mobile-app/business-logic.md` | draft |
+| Внедрить вход по email и необязательный Telegram в уже работающий аккаунт | `specs/007-email-account-entry/` | specified |
+| Войти в приложение по email и работать без Telegram | `features/mobile-app/app-email-entry.md` | ready-for-speckit |
+| В настройках указать второй вход, подтвердить его кодом и слить ходы | `features/mobile-app/link-second-entrance.md` | ready-for-speckit |
+| Начать разбор новости в приложении и вернуться в незаконченный | `features/mobile-app/app-news-run.md` | ready-for-speckit |
+| Открыть настройки того же входа: модель и информация о себе | `features/mobile-app/app-settings.md` | ready-for-speckit |
+| Войти по номеру телефона и коду из SMS | `specs/006-phone-account-entry/` | parked |
 | Научить скилл объединять текст профиля при слиянии | — | draft |

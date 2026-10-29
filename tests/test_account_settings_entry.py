@@ -1,15 +1,10 @@
 from app.account_settings import (
-    PHONE_EMPTY,
     PROFILE_STRENGTHS_PROMPT,
     SETTINGS_CALLBACK,
     SETTINGS_MODEL_CALLBACK,
     SETTINGS_MODEL_LABEL,
-    SETTINGS_PHONE_CALLBACK,
-    SETTINGS_PHONE_LABEL,
     SETTINGS_PROFILE_CALLBACK,
     SETTINGS_PROFILE_LABEL,
-    SETTINGS_TELEGRAM_CALLBACK,
-    SETTINGS_TELEGRAM_LABEL,
     SETTINGS_TITLE,
     settings_button,
     settings_menu_action,
@@ -34,19 +29,15 @@ def test_settings_button_replaces_model_opener():
 def test_settings_menu_contains_two_expected_options():
     action = settings_menu_action()
     assert action["kind"] == "settings_menu"
-    assert action["text"] == f"{SETTINGS_TITLE}\nТелефон: {PHONE_EMPTY}."
+    assert action["text"] == SETTINGS_TITLE
     buttons = [row[0] for row in action["buttons"]]
     assert [button["text"] for button in buttons] == [
         SETTINGS_MODEL_LABEL,
         SETTINGS_PROFILE_LABEL,
-        SETTINGS_PHONE_LABEL,
-        SETTINGS_TELEGRAM_LABEL,
     ]
     assert [button["callback_data"] for button in buttons] == [
         SETTINGS_MODEL_CALLBACK,
         SETTINGS_PROFILE_CALLBACK,
-        SETTINGS_PHONE_CALLBACK,
-        SETTINGS_TELEGRAM_CALLBACK,
     ]
 
 
@@ -72,7 +63,6 @@ def test_profile_callback_routes_to_profile_entry(monkeypatch):
         "self_facts": ["веду канал"],
     }
     monkeypatch.setattr("app.telegram_poll.read_visible_profile", lambda _conn, _pid: profile)
-    monkeypatch.setattr("app.telegram_poll.read_kept_profile_texts", lambda _conn, _pid: [])
     monkeypatch.setattr("app.telegram_poll.write_profile_edit_step", remember_step)
     actions = _settings_actions(conn, "person-1", SETTINGS_PROFILE_CALLBACK)
 
