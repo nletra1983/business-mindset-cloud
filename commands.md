@@ -17,4 +17,5 @@
 | `/speckit-converge` | `.cursor/skills/speckit-converge/` | Схождение остатка работ в tasks |
 | `/speckit-constitution` | `.cursor/skills/speckit-constitution/` | Конституция |
 
-Новая фича: `/po-new-feature` → `/arch-new-feature` → `/po-new-story` → при необходимости `/check-ready-to-speckit` → `/speckit-specify` по одной истории.
+Новая фича: `/po-new-feature` → `/arch-new-feature` → `/po-new-story` → при необходимости `/check-ready-to-speckit` → `/speckit-specify` по одной истории.  
+Зелёный шаг Spec Kit без вопросов → следующий (plan → tasks → implement), см. `.cursor/skills/speckit-auto-advance.md`.

@@ -16,6 +16,10 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Business Mindset: auto-advance
+
+После успешных tasks без вопросов человеку — сразу `/speckit-implement` той же спеки по `.cursor/skills/speckit-auto-advance.md`, если человек не написал «остановись перед implement». Не ждать «продолжай», не срезать шаги скилла.
+
 ## Pre-Execution Checks
 
 **Check for extension hooks (before tasks generation)**:

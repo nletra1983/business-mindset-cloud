@@ -67,7 +67,7 @@
 |---|---|---|---|
 | 1 | Внедрить вход по email и необязательный Telegram в уже работающий аккаунт | `specs/007-email-account-entry/` | in-impl |
 | 2 | Открыть защищённый вход модуля каналов для приложения | `specs/012-app-channel-api/` | in-impl |
-| 3 | Держать сессию входа на устройстве и дать явный выход | `features/mobile-app/app-session.md` | ready-for-speckit |
+| 3 | Держать сессию входа на устройстве и дать явный выход | `specs/013-app-session/` | in-impl |
 | 4 | Собрать Flutter-клиент и отдать автору подписанный APK | `features/mobile-app/app-apk-delivery.md` | ready-for-speckit |
 | 5 | Войти в приложение по email и работать без Telegram | `specs/008-app-email-entry/` | in-impl |
 | 6 | В настройках указать второй вход, подтвердить его кодом и слить ходы | `specs/009-link-second-entrance/` | in-impl |

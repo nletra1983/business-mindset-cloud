@@ -18,8 +18,10 @@ def dispatch(method: str, path: str, headers: dict, body: dict, *, book, session
         return _request_email(book, body)
     if rel == "/auth/email/confirm" and method == "POST":
         return _confirm_email(book, sessions, body)
+    if rel == "/auth/logout" and method == "POST":
+        return _logout(sessions, headers)
     person_id = _person(sessions, headers)
-    if person_id is None and rel not in {"/auth/email/request", "/auth/email/confirm"}:
+    if person_id is None and rel not in {"/auth/email/request", "/auth/email/confirm", "/auth/logout"}:
         return _error(401, "unauthorized", "нужна сессия")
 
     if rel == "/runs" and method == "GET":
@@ -93,6 +95,13 @@ def _confirm_email(book, sessions, body: dict) -> dict:
             "runs": screen["runs"],
         }
     )
+
+
+def _logout(sessions, headers: dict) -> dict:
+    auth = headers.get("Authorization") or headers.get("authorization") or ""
+    secret = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+    revoked = sessions.revoke(secret) if secret else False
+    return _ok({"signed_out": True, "revoked": revoked})
 
 
 def _start_run(conn, book, person_id, body: dict) -> dict:

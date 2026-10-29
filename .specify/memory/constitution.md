@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.1 → 1.5.0
-- Bump: MINOR — gate `/check-ready-to-speckit` перед `/speckit-specify`; штамп отпечатков границ.
+- Version change: 1.5.0 → 1.6.0
+- Bump: MINOR — автопереход Spec Kit specify→plan→tasks→implement без паузы, если нет вопросов.
 - Modified principles: none
 - Added sections: none
 - Removed sections: none
@@ -151,6 +151,8 @@ MUST храниться отдельно от транскрипта (ленты
 
 `/speckit-specify` MUST перед созданием или обновлением спеки проверить свежесть штампа и статус `ready-for-speckit` для этой истории. Если штампа нет или он протух, агент MUST сначала выполнить `/check-ready-to-speckit` для фичи/истории. Пока проверка не зелёная, спеку MUST NOT писать. Любая правка границы, `business-logic.md` или `arch-change.md` у уже готовой истории MUST в том же заходе вернуть статус в `draft` и сбросить затронутые записи штампа.
 
+После успешного шага Spec Kit без вопроса человеку и без `NEEDS CLARIFICATION` агент MUST сразу перейти к следующему шагу той же истории: specify → plan → tasks → implement (см. `.cursor/skills/speckit-auto-advance.md`). Автопереход MUST NOT срезать проверки скилла и MUST NOT сливать две истории. Оговорка «остановись перед implement» в сообщении человека MUST останавливать цепочку после tasks.
+
 ### Короткая команда
 
 Человек MAY назвать только команду Spec Kit и фичу так, как она названа
@@ -215,4 +217,4 @@ GitHub Action запускает на сервере обновление тол
 с этой конституцией; конфликт MUST останавливать работу до решения человека,
 а не «закрываться» допущением.
 
-**Version**: 1.5.0 | **Ratified**: 2026-10-23 | **Last Amended**: 2026-10-29
+**Version**: 1.6.0 | **Ratified**: 2026-10-23 | **Last Amended**: 2026-10-29

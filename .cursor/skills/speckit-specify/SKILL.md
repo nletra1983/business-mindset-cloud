@@ -16,6 +16,10 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Business Mindset: auto-advance
+
+После успешного specify без вопросов человеку — сразу `/speckit-plan` той же спеки по `.cursor/skills/speckit-auto-advance.md`. Не ждать «продолжай», не срезать шаги скилла.
+
 ## Business Mindset: gate before specify
 
 В этом репозитории `/speckit-specify` MUST NOT писать спеку, пока история не прошла свежую `/check-ready-to-speckit`.
