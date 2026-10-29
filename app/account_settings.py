@@ -7,6 +7,20 @@ SETTINGS_LABEL = "настройки"
 SETTINGS_TITLE = "Настройки аккаунта."
 SETTINGS_MODEL_LABEL = "выбор модели"
 SETTINGS_PROFILE_LABEL = "информация о себе"
+SETTINGS_EMAIL_CALLBACK = "settings:email"
+SETTINGS_EMAIL_LABEL = "email"
+SETTINGS_TELEGRAM_CALLBACK = "settings:telegram"
+SETTINGS_TELEGRAM_LABEL = "Telegram"
+EMAIL_LINK_PROMPT = "Пришли email."
+TELEGRAM_LINK_PROMPT = "Пришли идентификатор Telegram числом."
+LINK_CODE_SENT = "Код отправлен. Пришли код из сообщения."
+LINK_CODE_FAILED = "Код не отправлен."
+LINK_CODE_REJECTED = "Код не подошёл."
+EMAIL_LINK_BAD = "Адрес не разобран."
+TELEGRAM_LINK_BAD = "Идентификатор Telegram не разобран."
+ENTRANCE_CONFIRMED = "Вход подтверждён."
+ENTRANCES_MERGED = "Входы объединены."
+SECOND_STILL_OPEN = "Второй вход ещё не подтверждён."
 PROFILE_STRENGTHS_PROMPT = "Напиши сильные стороны о себе одним сообщением."
 PROFILE_WEAKNESSES_PROMPT = "Теперь напиши слабые стороны о себе одним сообщением."
 PROFILE_FACT_PROMPT = "Добавь один факт о себе. Если не хочешь добавлять, напиши «нет»."
@@ -30,6 +44,8 @@ def settings_menu_buttons() -> list[list[dict]]:
     return [
         [{"text": SETTINGS_MODEL_LABEL, "callback_data": SETTINGS_MODEL_CALLBACK}],
         [{"text": SETTINGS_PROFILE_LABEL, "callback_data": SETTINGS_PROFILE_CALLBACK}],
+        [{"text": SETTINGS_EMAIL_LABEL, "callback_data": SETTINGS_EMAIL_CALLBACK}],
+        [{"text": SETTINGS_TELEGRAM_LABEL, "callback_data": SETTINGS_TELEGRAM_CALLBACK}],
     ]
 
 

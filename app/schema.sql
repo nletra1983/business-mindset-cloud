@@ -80,7 +80,28 @@ CREATE TABLE IF NOT EXISTS profile_edit_session (
     step text NOT NULL DEFAULT 'idle',
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT profile_edit_session_step_check CHECK (
-        step IN ('idle', 'awaiting_strengths', 'awaiting_weaknesses', 'awaiting_extra_fact')
+        step IN (
+            'idle',
+            'awaiting_strengths',
+            'awaiting_weaknesses',
+            'awaiting_extra_fact',
+            'awaiting_email',
+            'awaiting_telegram',
+            'awaiting_link_code'
+        )
+    )
+);
+
+ALTER TABLE profile_edit_session DROP CONSTRAINT IF EXISTS profile_edit_session_step_check;
+ALTER TABLE profile_edit_session ADD CONSTRAINT profile_edit_session_step_check CHECK (
+    step IN (
+        'idle',
+        'awaiting_strengths',
+        'awaiting_weaknesses',
+        'awaiting_extra_fact',
+        'awaiting_email',
+        'awaiting_telegram',
+        'awaiting_link_code'
     )
 );
 

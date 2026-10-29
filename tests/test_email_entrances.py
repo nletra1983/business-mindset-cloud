@@ -73,10 +73,10 @@ def test_known_email_opens_the_same_person_and_does_not_merge():
     assert book.runs_of(email_person) == ["ход-почта"]
 
 
-def test_bot_does_not_ask_for_email():
-    poll = Path("app/telegram_poll.py").read_text(encoding="utf-8")
+def test_run_does_not_ask_for_email():
+    flow = Path("app/run_flow.py").read_text(encoding="utf-8")
     schema = Path("app/schema.sql").read_text(encoding="utf-8")
-    assert "email" not in poll.lower()
+    assert "email" not in flow.lower()
     assert "phone_link" not in schema
     assert "CREATE TABLE IF NOT EXISTS email_link" in schema
 
