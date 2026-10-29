@@ -16,6 +16,24 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Business Mindset: auto-advance
+
+После успешного specify без вопросов человеку — сразу `/speckit-plan` той же спеки по `.cursor/skills/speckit-auto-advance.md`. Не ждать «продолжай», не срезать шаги скилла.
+
+## Business Mindset: gate before specify
+
+В этом репозитории `/speckit-specify` MUST NOT писать спеку, пока история не прошла свежую `/check-ready-to-speckit`.
+
+1. По `features/feature-map.md` найти фичу и историю, которую сейчас специфицируют (короткая команда с именем фичи — как в конституции: брать `ready-for-speckit` без папки `specs/`, либо явно названную историю).
+2. Проверить штамп `features/<slug>/speckit-ready-stamp.json` по правилам `.cursor/skills/check-ready-to-speckit/stamp.md` и статус в карте.
+3. Если штамп **свеж** для этой истории — продолжать Pre-Execution Checks и Outline.
+4. Если штампа нет, он протух, или в карте не `ready-for-speckit`:
+   - Выполнить `.cursor/skills/check-ready-to-speckit/SKILL.md` для этой фичи и этой истории (дописать артефакты из чата, если есть ответы; иначе спросить).
+   - Если после проверки история не зелёная — **остановиться**, спеку не создавать и не обновлять. Показать вопросы проверки.
+   - Если зелёная — продолжить specify в том же заходе.
+
+Не считать «человек сказал ready в чате» заменой штампа. Не пропускать gate для Cloud или «ускорения».
+
 ## Pre-Execution Checks
 
 **Check for extension hooks (before specification)**:

@@ -12,8 +12,9 @@
 1. Открыть этот проект в Cursor.
 2. Новая фича: `/po-new-feature` и описание своими словами. Агент пишет `features/<фича>/business-logic.md`, строку в [features/feature-map.md](../features/feature-map.md) и при необходимости зовёт `/arch-new-feature`, затем `/po-new-story`. Пока есть `NEEDS CLARIFICATION` или невыбранный `ARH-CHANGE`, к Spec Kit не переходить.
 3. Граница истории для спеки лежит в папке фичи. Карта хранит фичу, её истории и статус каждой.
-4. `git add` / `commit` / `push`.
-5. При необходимости локально: `/speckit-specify` … (или сразу с телефона).
+4. После бизнес-уточнений: `/check-ready-to-speckit` и название фичи или историй. Проверка идёт по файлам; ответы из чата сначала дописываются в артефакты. Успех пишет `ready-for-speckit` и `speckit-ready-stamp.json` (отпечатки границ). Правка этих файлов снова сбрасывает готовность в `draft`.
+5. `git add` / `commit` / `push`.
+6. `/speckit-specify` … — если штамп протух или его нет, сначала сам прогоняет `/check-ready-to-speckit`; пока красное, спеку не пишет. Если шаг зелёный и вопросов нет — сам идёт plan → tasks → implement той же истории (`.cursor/skills/speckit-auto-advance.md`). Две истории не сливает. «Остановись перед implement» — стоп после tasks.
 
 Контекст «что уже сделано»: `features/feature-map.md`, `specs/`, `app/`.
 

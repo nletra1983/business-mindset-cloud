@@ -1,10 +1,14 @@
 from app.account_settings import (
     PROFILE_STRENGTHS_PROMPT,
     SETTINGS_CALLBACK,
+    SETTINGS_EMAIL_CALLBACK,
+    SETTINGS_EMAIL_LABEL,
     SETTINGS_MODEL_CALLBACK,
     SETTINGS_MODEL_LABEL,
     SETTINGS_PROFILE_CALLBACK,
     SETTINGS_PROFILE_LABEL,
+    SETTINGS_TELEGRAM_CALLBACK,
+    SETTINGS_TELEGRAM_LABEL,
     SETTINGS_TITLE,
     settings_button,
     settings_menu_action,
@@ -34,10 +38,14 @@ def test_settings_menu_contains_two_expected_options():
     assert [button["text"] for button in buttons] == [
         SETTINGS_MODEL_LABEL,
         SETTINGS_PROFILE_LABEL,
+        SETTINGS_EMAIL_LABEL,
+        SETTINGS_TELEGRAM_LABEL,
     ]
     assert [button["callback_data"] for button in buttons] == [
         SETTINGS_MODEL_CALLBACK,
         SETTINGS_PROFILE_CALLBACK,
+        SETTINGS_EMAIL_CALLBACK,
+        SETTINGS_TELEGRAM_CALLBACK,
     ]
 
 

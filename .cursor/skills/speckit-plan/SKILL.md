@@ -16,6 +16,10 @@ $ARGUMENTS
 
 You **MUST** consider the user input before proceeding (if not empty).
 
+## Business Mindset: auto-advance
+
+После успешного plan без вопросов человеку — сразу `/speckit-tasks` той же спеки по `.cursor/skills/speckit-auto-advance.md`. Не ждать «продолжай», не срезать шаги скилла.
+
 ## Pre-Execution Checks
 
 **Check for extension hooks (before planning)**:
