@@ -31,6 +31,8 @@ disable-model-invocation: true
 
 В `features/feature-map.md` поставить `ready-for-speckit` только историям без открытых вопросов. Остальные оставить `draft`.
 
+Если эта команда меняет `business-logic.md`, `arch-change.md` или файл границы у истории, которая уже была `ready-for-speckit`, сбросить готовность по `.cursor/skills/check-ready-to-speckit/stamp.md`: статус снова `draft`, запись убрать из `speckit-ready-stamp.json`. Не оставлять старый штамп на новых текстах.
+
 ## Саммари
 
 Какие истории готовы к Spec Kit, какие ждут. Для готовых дать следующую команду дословно:

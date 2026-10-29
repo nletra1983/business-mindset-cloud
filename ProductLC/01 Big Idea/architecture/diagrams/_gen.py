@@ -335,7 +335,7 @@ def containers():
         ),
         cell(
             "mobile",
-            block("Мобильное приложение", "[Container: клиент]", "Вход по email. Ходит только в каналы"),
+            block("Мобильное приложение", "[Container: Flutter]", "Один клиент. APK автору. Только каналы"),
             SYSTEM,
             266,
             180,

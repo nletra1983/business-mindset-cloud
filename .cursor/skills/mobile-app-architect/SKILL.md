@@ -1,9 +1,10 @@
 ---
 name: mobile-app-architect
 description: >-
-  Выбирает клиент мобильного приложения и путь установки: нативный Android и
-  iOS, Flutter, React Native, Kotlin Multiplatform, APK для автора, магазин
-  позже. Use when the user asks about a mobile app, Android, iOS, APK,
+  Выбирает библиотеку и путь установки внутри класса клиента из
+  it-solution-architect/mobile.md: нативный Android и iOS, Flutter, React
+  Native, Kotlin Multiplatform, APK для автора, магазин позже. Use when the
+  user asks about a mobile app, Android, iOS, APK,
   sideload, Flutter, Jetpack Compose, SwiftUI, React Native, Kotlin
   Multiplatform, Compose Multiplatform, app stores, RuStore, or the
   mobile-app feature.
@@ -17,7 +18,8 @@ description: >-
 
 1. `features/mobile-app/business-logic.md` и истории в этой папке.
 2. `ProductLC/01 Big Idea/architecture/helicopter.md` и `arch-decision-log.md`.
-3. [stacks.md](stacks.md) и [distribution.md](distribution.md). Версии платформ перед фиксацией выбора сверить с первоисточником: они сдвигаются.
+3. `it-solution-architect/mobile.md` — класс клиента. Здесь его не выбирать заново.
+4. [stacks.md](stacks.md) и [distribution.md](distribution.md). Версии платформ перед фиксацией выбора сверить с первоисточником: они сдвигаются.
 
 Если в постановке есть `NEEDS CLARIFICATION` или открытый `ARH-CHANGE`, стек не выбирать. Сначала закрыть это по `/arch-new-feature`.
 
@@ -25,7 +27,7 @@ description: >-
 
 Отвечает на четыре вопроса и только на те, которые человек задал:
 
-1. Какой клиент: два нативных, один универсальный, или общая логика и два интерфейса.
+1. Какая библиотека внутри класса, уже записанного в `it-solution-architect/mobile.md`.
 2. Что остаётся платформенным даже в универсальном клиенте.
 3. Какой файл ставится на телефон сейчас и какой путь будет у других людей.
 4. Что для этого нужно на машине автора.
@@ -36,7 +38,7 @@ description: >-
 
 1. Снять ограничения продукта: кто ставит приложение, какие ОС, есть ли офлайн, кто вызывает модель, какой сервер уже есть, на какой ОС сидит автор.
 2. Отсечь варианты, которые ломают ограничение. Телефон не вызывает провайдера модели. Офлайн-ход не проектировать, если продукт его не обещает. Магазин не тащить в сборку, которая явно без магазина.
-3. Выбрать клиент по [stacks.md](stacks.md). Для текущего продукта, пока человек не решил иначе: Android первым, файл автору, iOS вторым клиентом с теми же правилами, один человек, диалог и списки. Тогда по умолчанию Flutter последней stable. Причина: один интерфейс, APK собирается на Windows, iOS подключается позже на Mac.
+3. Класс клиента не выбирать здесь. Его берёшь из `it-solution-architect/mobile.md`. Инструмент внутри уже выбранного класса и путь установки — по [stacks.md](stacks.md) и [distribution.md](distribution.md). Выбор библиотеки в журнал не писать.
 4. Назвать путь установки по [distribution.md](distribution.md).
 5. Если выбор меняет принятую архитектуру, не править её молча. Это вход в `/arch-new-feature`.
 

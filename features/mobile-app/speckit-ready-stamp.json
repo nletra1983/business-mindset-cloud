@@ -1,0 +1,27 @@
+{
+  "checked_at": "2026-10-29T11:20:35+03:00",
+  "feature_files": {
+    "business-logic.md": "8a21c94ea7fc3e2b24cde6164aeb2841ffe9584d1881af11f9623a35b3a24ac9",
+    "arch-change.md": "d61cd06b879abdd85348e4032ae39be99cbbf550ab01092007dfd69b44f256b9"
+  },
+  "stories": [
+    {
+      "no": 2,
+      "title": "Открыть защищённый вход модуля каналов для приложения",
+      "boundary": "features/mobile-app/app-channel-api.md",
+      "sha256": "6a4fc8ff2b30b7e84cecff36d1436d2cdd90da638c88950832c972c79bfdd93a"
+    },
+    {
+      "no": 3,
+      "title": "Держать сессию входа на устройстве и дать явный выход",
+      "boundary": "features/mobile-app/app-session.md",
+      "sha256": "b90fc54e7f47ce2040ffb9e7c04dadd62854cdc3cd6d80bbe4e9bbb3bf69f186"
+    },
+    {
+      "no": 4,
+      "title": "Собрать Flutter-клиент и отдать автору подписанный APK",
+      "boundary": "features/mobile-app/app-apk-delivery.md",
+      "sha256": "45ec1a4fe08ec3e58b9fa0d933ea212aad4704bd4fb46f10076f17c68e463764"
+    }
+  ]
+}

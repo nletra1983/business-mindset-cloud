@@ -90,5 +90,5 @@ disable-model-invocation: true
 - [enterprise-business.md](enterprise-business.md) — бизнес и ландшафт
 - [cloud-platform.md](cloud-platform.md) — облако и платформа
 - [ai-systems.md](ai-systems.md) — модели, поиск, агенты
-- [mobile.md](mobile.md) — клиенты на устройствах
+- [mobile.md](mobile.md) — класс клиента и швы устройства. Библиотека и установка — скилл `mobile-app-architect`, в линзу их не копировать
 - [evolution.md](evolution.md) — как дополнять скилл

@@ -18,7 +18,11 @@ services:
       - ./secrets/sber.env
       - ./secrets/zai.env
       - ./secrets/postgres.env
+      - ./secrets/mail.env
     environment:
       POSTGRES_HOST: db
+      CHANNEL_HTTP_PORT: "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
     depends_on:
       - db

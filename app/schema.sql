@@ -195,3 +195,19 @@ CREATE TABLE IF NOT EXISTS kept_profile_text (
     self_facts jsonb NOT NULL DEFAULT '[]'::jsonb,
     created_at timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS app_session (
+    id uuid PRIMARY KEY,
+    person_id uuid NOT NULL REFERENCES person (id),
+    secret_hash text NOT NULL UNIQUE,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    revoked_at timestamptz NULL
+);
+
+CREATE TABLE IF NOT EXISTS processed_app_operation (
+    person_id uuid NOT NULL REFERENCES person (id),
+    operation_key text NOT NULL,
+    response_json jsonb NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (person_id, operation_key)
+);
