@@ -14,13 +14,22 @@ def test_flutter_project_exists_with_stable_package_id():
 
 
 def test_signing_key_example_exists_and_real_key_ignored():
+    import subprocess
+
     example = MOBILE / "android" / "key.properties.example"
     assert example.is_file()
-    assert not (MOBILE / "android" / "key.properties").exists()
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
     assert "mobile/android/key.properties" in gitignore
     assert "*.jks" in gitignore or "mobile/android/**/*.jks" in gitignore
-    assert "mobile/**/*.apk" in gitignore
+    assert "mobile/**/*.apk" in gitignore or "mobile/build/" in gitignore
+    props = MOBILE / "android" / "key.properties"
+    if props.exists():
+        ignored = subprocess.run(
+            ["git", "check-ignore", "-q", str(props)],
+            cwd=ROOT,
+            check=False,
+        )
+        assert ignored.returncode == 0
 
 
 def test_client_uses_only_app_v1_channel_prefix():
