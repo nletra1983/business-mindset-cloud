@@ -64,7 +64,7 @@
 | История | Спека | Статус |
 |---|---|---|
 | Внедрить вход по email и необязательный Telegram в уже работающий аккаунт | `specs/007-email-account-entry/` | in-impl |
-| Войти в приложение по email и работать без Telegram | `features/mobile-app/app-email-entry.md` | ready-for-speckit |
+| Войти в приложение по email и работать без Telegram | `specs/008-app-email-entry/` | in-impl |
 | В настройках указать второй вход, подтвердить его кодом и слить ходы | `features/mobile-app/link-second-entrance.md` | ready-for-speckit |
 | Начать разбор новости в приложении и вернуться в незаконченный | `features/mobile-app/app-news-run.md` | ready-for-speckit |
 | Открыть настройки того же входа: модель и информация о себе | `features/mobile-app/app-settings.md` | ready-for-speckit |
