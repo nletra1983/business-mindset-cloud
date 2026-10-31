@@ -43,8 +43,9 @@ class EntryShell extends StatefulWidget {
 class _EntryShellState extends State<EntryShell> {
   final _email = TextEditingController();
   final _code = TextEditingController();
-  String _status = 'Укажи email. Клиент ходит только в /app/v1.';
+  String _status = 'Укажи email.\nСервер: $channelBaseUrl';
   bool _inside = false;
+  bool _busy = false;
   List<dynamic> _runs = const [];
 
   @override
@@ -56,55 +57,90 @@ class _EntryShellState extends State<EntryShell> {
   Future<void> _restore() async {
     final secret = await widget.sessions.get();
     if (secret == null) return;
-    final result = await widget.client.listRuns(secret);
-    if (result['statusCode'] == 200) {
-      setState(() {
-        _inside = true;
-        _runs = (result['body'] as Map)['runs'] as List<dynamic>? ?? const [];
-        _status = _runs.isEmpty ? 'Ходов пока нет.' : 'Список ходов.';
-      });
-    } else {
+    try {
+      final result = await widget.client.listRuns(secret);
+      if (result['statusCode'] == 200) {
+        setState(() {
+          _inside = true;
+          _runs = (result['body'] as Map)['runs'] as List<dynamic>? ?? const [];
+          _status = _runs.isEmpty ? 'Ходов пока нет.' : 'Список ходов.';
+        });
+      } else {
+        await widget.sessions.clear();
+      }
+    } catch (_) {
       await widget.sessions.clear();
     }
   }
 
   Future<void> _requestCode() async {
-    final result = await widget.client.requestEmailCode(_email.text.trim());
+    final email = _email.text.trim();
+    if (email.isEmpty) {
+      setState(() => _status = 'Сначала введи email.');
+      return;
+    }
     setState(() {
-      _status = result['statusCode'] == 200
-          ? 'Пришли код из письма.'
-          : 'Код не отправлен.';
+      _busy = true;
+      _status = 'Отправляю запрос на сервер…\n$channelBaseUrl';
     });
+    try {
+      final result = await widget.client.requestEmailCode(email);
+      setState(() {
+        _status = result['statusCode'] == 200
+            ? 'Пришли код из письма на $email'
+            : 'Код не отправлен. Ответ: ${result['statusCode']} ${result['body']}';
+      });
+    } catch (error) {
+      setState(() => _status = 'Не достучались до сервера: $error');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _confirm() async {
-    final result = await widget.client.confirmEmailCode(
-      _email.text.trim(),
-      _code.text.trim(),
-    );
-    if (result['statusCode'] != 200) {
-      setState(() => _status = 'Код не подошёл.');
-      return;
-    }
-    final secret = (result['body'] as Map)['session_secret'] as String;
-    await widget.sessions.put(secret);
     setState(() {
-      _inside = true;
-      _runs = (result['body'] as Map)['runs'] as List<dynamic>? ?? const [];
-      _status = _runs.isEmpty ? 'Ходов пока нет.' : 'Список ходов.';
+      _busy = true;
+      _status = 'Проверяю код…';
     });
+    try {
+      final result = await widget.client.confirmEmailCode(
+        _email.text.trim(),
+        _code.text.trim(),
+      );
+      if (result['statusCode'] != 200) {
+        final body = result['body'];
+        final detail = body is Map && body['message'] != null
+            ? body['message']
+            : body;
+        setState(() => _status = 'Код не подошёл. Ответ: ${result['statusCode']} $detail');
+        return;
+      }
+      final secret = (result['body'] as Map)['session_secret'] as String;
+      await widget.sessions.put(secret);
+      setState(() {
+        _inside = true;
+        _runs = (result['body'] as Map)['runs'] as List<dynamic>? ?? const [];
+        _status = _runs.isEmpty ? 'Ходов пока нет.' : 'Список ходов.';
+      });
+    } catch (error) {
+      setState(() => _status = 'Не достучались до сервера: $error');
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _logout() async {
     final secret = await widget.sessions.get();
     if (secret != null) {
-      await widget.client.logout(secret);
+      try {
+        await widget.client.logout(secret);
+      } catch (_) {}
     }
     await widget.sessions.clear();
     setState(() {
       _inside = false;
       _runs = const [];
-      _status = 'Вышел. Нужен новый код.';
+      _status = 'Вышел. Нужен новый код.\nСервер: $channelBaseUrl';
     });
   }
 
@@ -118,18 +154,30 @@ class _EntryShellState extends State<EntryShell> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(_status),
+            if (_busy) const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Center(child: CircularProgressIndicator()),
+            ),
             if (!_inside) ...[
               TextField(
                 controller: _email,
+                enabled: !_busy,
                 decoration: const InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
               ),
               TextField(
                 controller: _code,
+                enabled: !_busy,
                 decoration: const InputDecoration(labelText: 'Код'),
               ),
-              ElevatedButton(onPressed: _requestCode, child: const Text('Запросить код')),
-              ElevatedButton(onPressed: _confirm, child: const Text('Подтвердить')),
+              ElevatedButton(
+                onPressed: _busy ? null : _requestCode,
+                child: const Text('Запросить код'),
+              ),
+              ElevatedButton(
+                onPressed: _busy ? null : _confirm,
+                child: const Text('Подтвердить'),
+              ),
             ] else ...[
               Expanded(
                 child: ListView(

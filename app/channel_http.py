@@ -62,6 +62,12 @@ class _Handler(BaseHTTPRequestHandler):
                 sessions=SqlSessionStore(conn),
                 conn=conn,
             )
+            # SqlBook writes (save_code, bind, …) do not commit themselves.
+            # Without this, the email is sent but the code never lands in Postgres.
+            if result["status"] < 400:
+                conn.commit()
+            else:
+                conn.rollback()
         finally:
             conn.close()
         self._write(result["status"], result["body"])

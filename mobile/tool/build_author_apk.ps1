@@ -11,7 +11,7 @@ if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
 
 $props = Join-Path $root "android\key.properties"
 if (-not (Test-Path $props)) {
-    Write-Warning "android/key.properties missing — release may fall back to debug signing. Copy key.properties.example and point to your keystore."
+    Write-Warning "android/key.properties missing - release may fall back to debug signing. Copy key.properties.example and point to your keystore."
 }
 
 $base = $env:CHANNEL_BASE_URL
