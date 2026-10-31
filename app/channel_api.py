@@ -1,7 +1,15 @@
 from app.app_entry import submit_code, submit_email
 from app.app_links import second_entrance_screen, submit_email_link, submit_link_code, submit_telegram_link
 from app.app_news import EXCLUDED_ACTIONS, LIST_ACTIONS, begin_from_list, list_screen, resume_from_list
-from app.app_settings import choose_model, model_screen, open_settings, show_profile
+from app.app_settings import (
+    choose_model_for_person,
+    model_screen,
+    open_settings,
+    save_fact,
+    save_strengths,
+    save_weaknesses,
+    show_profile,
+)
 from app.person import read_model_state, read_visible_profile
 
 _BLANK_TOPIC = "Пусто. Сформулируй новость или проблему своими словами."
@@ -56,10 +64,7 @@ def dispatch(method: str, path: str, headers: dict, body: dict, *, book, session
         state = read_model_state(conn, person_id) if conn is not None else {"current_model": "deepseek-chat"}
         return _ok(model_screen(state["current_model"]))
     if rel == "/settings/models" and method == "POST":
-        person = {"current_model": (body or {}).get("current") or "deepseek-chat"}
-        if conn is not None:
-            person = read_model_state(conn, person_id)
-        return _ok(choose_model(person, None, (body or {}).get("model_id") or ""))
+        return _ok(choose_model_for_person(conn, person_id, (body or {}).get("model_id") or ""))
     if rel == "/settings/profile" and method == "GET":
         profile = (
             read_visible_profile(conn, person_id)
@@ -67,6 +72,12 @@ def dispatch(method: str, path: str, headers: dict, body: dict, *, book, session
             else {"strengths_text": "", "weaknesses_text": "", "self_facts": []}
         )
         return _ok(show_profile(profile))
+    if rel == "/settings/profile/strengths" and method == "POST":
+        return _ok(save_strengths(conn, person_id, (body or {}).get("text") or ""))
+    if rel == "/settings/profile/weaknesses" and method == "POST":
+        return _ok(save_weaknesses(conn, person_id, (body or {}).get("text") or ""))
+    if rel == "/settings/profile/fact" and method == "POST":
+        return _ok(save_fact(conn, person_id, (body or {}).get("text") or ""))
     if rel == "/settings/second-entrance" and method == "GET":
         return _ok(second_entrance_screen())
     if rel == "/settings/second-entrance/email" and method == "POST":

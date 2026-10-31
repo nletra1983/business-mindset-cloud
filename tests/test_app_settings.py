@@ -11,8 +11,10 @@ def test_settings_exist_at_the_three_bot_moments():
 
 def test_settings_are_model_and_profile_only():
     screen = open_settings()
-    assert screen["actions"] == ["model", "profile"]
-    assert screen["offers_second_entrance"] is False
+    assert "model" in screen["actions"]
+    assert "profile" in screen["actions"]
+    assert "second_entrance" in screen["actions"]
+    assert screen["offers_second_entrance"] is True
     assert screen["starts_review"] is False
     assert screen["shows_hidden_profile"] is False
 

@@ -136,7 +136,8 @@ def test_settings_and_second_entrance_need_session():
         book=book,
         sessions=sessions,
     )
-    assert opened["body"]["actions"] == ["model", "profile"]
+    assert opened["body"]["actions"] == ["model", "profile", "second_entrance"]
+    assert opened["body"]["offers_second_entrance"] is True
     second = dispatch(
         "GET",
         f"{APP_PREFIX}/settings/second-entrance",
@@ -146,3 +147,36 @@ def test_settings_and_second_entrance_need_session():
         sessions=sessions,
     )
     assert second["body"]["actions"] == ["email", "telegram"]
+
+
+def test_settings_model_change_and_visible_profile_write():
+    from app.model_switch import CHANGED
+
+    book = _book()
+    sessions = MemorySessionStore()
+    person = book.add_person(email="a@example.com")
+    secret = sessions.issue(person)
+    headers = {"Authorization": f"Bearer {secret}"}
+    changed = dispatch(
+        "POST",
+        f"{APP_PREFIX}/settings/models",
+        headers,
+        {"model_id": "glm-5.3-flash"},
+        book=book,
+        sessions=sessions,
+    )
+    assert changed["ok"] is True
+    assert changed["body"]["text"] == CHANGED
+    assert changed["body"]["current"] == "glm-5.3-flash"
+    strengths = dispatch(
+        "POST",
+        f"{APP_PREFIX}/settings/profile/strengths",
+        headers,
+        {"text": "умею учиться"},
+        book=book,
+        sessions=sessions,
+    )
+    assert strengths["ok"] is True
+    assert strengths["body"]["shows_hidden_profile"] is False
+    assert "умею учиться" in strengths["body"]["text"]
+    assert strengths["body"]["saved"] == "strengths"

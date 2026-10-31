@@ -106,6 +106,114 @@ class ChannelClient {
     return _decode(response);
   }
 
+  Future<Map<String, dynamic>> openSettings(String sessionSecret) async {
+    final response = await _http.get(
+      _uri('/settings'),
+      headers: {'Authorization': 'Bearer $sessionSecret'},
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> getModels(String sessionSecret) async {
+    final response = await _http.get(
+      _uri('/settings/models'),
+      headers: {'Authorization': 'Bearer $sessionSecret'},
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> chooseModel(String sessionSecret, String modelId) async {
+    final response = await _http.post(
+      _uri('/settings/models'),
+      headers: {
+        'Authorization': 'Bearer $sessionSecret',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'model_id': modelId}),
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> getProfile(String sessionSecret) async {
+    final response = await _http.get(
+      _uri('/settings/profile'),
+      headers: {'Authorization': 'Bearer $sessionSecret'},
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> saveProfileStrengths(String sessionSecret, String text) async {
+    return _postProfilePart(sessionSecret, '/settings/profile/strengths', text);
+  }
+
+  Future<Map<String, dynamic>> saveProfileWeaknesses(String sessionSecret, String text) async {
+    return _postProfilePart(sessionSecret, '/settings/profile/weaknesses', text);
+  }
+
+  Future<Map<String, dynamic>> saveProfileFact(String sessionSecret, String text) async {
+    return _postProfilePart(sessionSecret, '/settings/profile/fact', text);
+  }
+
+  Future<Map<String, dynamic>> openSecondEntrance(String sessionSecret) async {
+    final response = await _http.get(
+      _uri('/settings/second-entrance'),
+      headers: {'Authorization': 'Bearer $sessionSecret'},
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> submitSecondEmail(String sessionSecret, String email) async {
+    final response = await _http.post(
+      _uri('/settings/second-entrance/email'),
+      headers: {
+        'Authorization': 'Bearer $sessionSecret',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'email': email}),
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> submitSecondTelegram(String sessionSecret, String telegram) async {
+    final response = await _http.post(
+      _uri('/settings/second-entrance/telegram'),
+      headers: {
+        'Authorization': 'Bearer $sessionSecret',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'telegram': telegram}),
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> submitSecondCode(String sessionSecret, String code) async {
+    final response = await _http.post(
+      _uri('/settings/second-entrance/code'),
+      headers: {
+        'Authorization': 'Bearer $sessionSecret',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'code': code}),
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> _postProfilePart(
+    String sessionSecret,
+    String path,
+    String text,
+  ) async {
+    final response = await _http.post(
+      _uri(path),
+      headers: {
+        'Authorization': 'Bearer $sessionSecret',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'text': text}),
+    );
+    return _decode(response);
+  }
+
   Map<String, dynamic> _decode(http.Response response) {
     final body = response.body.isEmpty
         ? <String, dynamic>{}
