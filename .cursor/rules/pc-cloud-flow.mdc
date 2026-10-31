@@ -12,5 +12,5 @@ alwaysApply: true
 - Скрипты Spec Kit: только `.specify/scripts/bash/` (не powershell), если skill не говорит иное.
 - Cloud / телефон: читать только файлы репозитория; не предполагать локальный `D:\` вне git.
 - Дыры в постановке не закрывать молча — спросить пользователя.
-- После specify/plan/tasks/implement предложить обновить статус в `feature-map.md`.
-- На сервер Selectel агент не заходит. Бот обновляется сам, когда коммит попадает в `main`.
+- После specify/plan/tasks/implement предложить обновить статус в `feature-map.md` или сразу `/publish` (карта + коммит + push в `main` + при необходимости APK). Скилл: `.cursor/skills/publish/SKILL.md`.
+- На сервер Selectel агент не заходит. Бот обновляется сам, когда коммит попадает в `main` (в т.ч. через `/publish`).
