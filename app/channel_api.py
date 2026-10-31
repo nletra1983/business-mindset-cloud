@@ -1,8 +1,10 @@
 from app.app_entry import submit_code, submit_email
 from app.app_links import second_entrance_screen, submit_email_link, submit_link_code, submit_telegram_link
-from app.app_news import begin_from_list, list_screen, resume_from_list
+from app.app_news import EXCLUDED_ACTIONS, LIST_ACTIONS, begin_from_list, list_screen, resume_from_list
 from app.app_settings import choose_model, model_screen, open_settings, show_profile
 from app.person import read_model_state, read_visible_profile
+
+_BLANK_TOPIC = "Пусто. Сформулируй новость или проблему своими словами."
 
 APP_PREFIX = "/app/v1"
 
@@ -25,7 +27,9 @@ def dispatch(method: str, path: str, headers: dict, body: dict, *, book, session
         return _error(401, "unauthorized", "нужна сессия")
 
     if rel == "/runs" and method == "GET":
-        return _ok({"runs": list(book.runs_of(person_id))})
+        return _list_runs(conn, book, person_id)
+    if rel == "/runs/leave" and method == "POST":
+        return _leave_to_list(conn, book, person_id)
     if rel == "/runs" and method == "POST":
         return _idempotent(
             sessions,
@@ -35,6 +39,8 @@ def dispatch(method: str, path: str, headers: dict, body: dict, *, book, session
         )
     if rel.startswith("/runs/") and rel.endswith("/resume") and method == "POST":
         run_id = rel[len("/runs/") : -len("/resume")]
+        if conn is None:
+            return _error(400, "no_store", "ход без базы не открыть")
         return _ok({"actions": resume_from_list(conn, person_id, run_id)})
     if rel.startswith("/runs/") and rel.endswith("/answers") and method == "POST":
         run_id = rel[len("/runs/") : -len("/answers")]
@@ -104,19 +110,56 @@ def _logout(sessions, headers: dict) -> dict:
     return _ok({"signed_out": True, "revoked": revoked})
 
 
-def _start_run(conn, book, person_id, body: dict) -> dict:
+def _list_runs(conn, book, person_id) -> dict:
     if conn is None:
-        topic = ((body or {}).get("topic") or "").strip()
-        if not topic:
-            return _error(400, "blank_topic", "Пусто. Сформулируй новость или проблему своими словами.")
+        return _ok(
+            {
+                "runs": list(book.runs_of(person_id)),
+                "actions": list(LIST_ACTIONS),
+                "excluded": list(EXCLUDED_ACTIONS),
+            }
+        )
+    from app.run_flow import open_runs
+
+    runs = [
+        {"id": str(run_id), "topic": topic, "step": step}
+        for run_id, topic, step, _version in open_runs(conn, person_id)
+    ]
+    return _ok(
+        {
+            "runs": runs,
+            "actions": list(LIST_ACTIONS),
+            "excluded": list(EXCLUDED_ACTIONS),
+        }
+    )
+
+
+def _leave_to_list(conn, book, person_id) -> dict:
+    """Leave the open run window unfinished and return the list (no pause status)."""
+    if conn is not None:
+        from app.run_flow import leave_window
+
+        leave_window(conn, person_id)
+    return _list_runs(conn, book, person_id)
+
+
+def _start_run(conn, book, person_id, body: dict) -> dict:
+    topic = ((body or {}).get("topic") or "").strip()
+    if not topic:
+        return _error(400, "blank_topic", _BLANK_TOPIC)
+    if conn is None:
         runs = list(book.runs_of(person_id))
         runs.append(topic)
         if hasattr(book, "people") and str(person_id) in book.people:
             book.people[str(person_id)]["runs"] = runs
         return _ok({"started": True, "topic": topic, "runs": runs})
-    person = {"id": person_id, "accepting_new": True, "current_model": read_model_state(conn, person_id)["current_model"]}
-    actions = begin_from_list(conn, person, chat_id=0, message_id=0, text=(body or {}).get("topic") or "")
-    return _ok({"actions": actions})
+    person = {
+        "id": person_id,
+        "accepting_new": True,
+        "current_model": read_model_state(conn, person_id)["current_model"],
+    }
+    actions = begin_from_list(conn, person, chat_id=0, message_id=0, text=topic)
+    return _ok({"actions": actions, "topic": topic})
 
 
 def _answer_run(conn, book, person_id, run_id, body: dict) -> dict:

@@ -22,8 +22,8 @@ description: "Task list for start/resume news review in the app"
 
 **Purpose**: Confirm the feature folder and existing seams
 
-- [ ] T001 Confirm `app/app_news.py` and `tests/test_app_news_run.py` match plan.md structure; note any missing seam for Flutter in `specs/010-app-news-run/tasks.md` notes only if found during implement
-- [ ] T002 [P] Read `specs/012-app-channel-api/contracts/app-channel-v1.md` run endpoints and map them to Flutter client methods in `mobile/lib/channel_client.dart`
+- [x] T001 Confirm `app/app_news.py` and `tests/test_app_news_run.py` match plan.md structure; note any missing seam for Flutter in `specs/010-app-news-run/tasks.md` notes only if found during implement
+- [x] T002 [P] Read `specs/012-app-channel-api/contracts/app-channel-v1.md` run endpoints and map them to Flutter client methods in `mobile/lib/channel_client.dart`
 
 ---
 
@@ -33,9 +33,9 @@ description: "Task list for start/resume news review in the app"
 
 **⚠️ CRITICAL**: No Flutter story UI until blank-topic and list payload are honest for `/app/v1`
 
-- [ ] T003 Reject empty or content-free `topic` on `POST /app/v1/runs` when `conn` is present (same product wording as memory path) in `app/channel_api.py`
-- [ ] T004 [P] Ensure `GET /app/v1/runs` (or documented list path used by the app) returns enough fields to open an unfinished run (id + label/step) without offering past/redo/delete — `app/channel_api.py`, reuse `app/app_news.py` `list_screen` / `LIST_ACTIONS` / `EXCLUDED_ACTIONS` as needed
-- [ ] T005 [P] Add or extend channel API tests for blank topic and list shape in `tests/test_channel_api.py` (and keep `tests/test_app_news_run.py` green)
+- [x] T003 Reject empty or content-free `topic` on `POST /app/v1/runs` when `conn` is present (same product wording as memory path) in `app/channel_api.py`
+- [x] T004 [P] Ensure `GET /app/v1/runs` (or documented list path used by the app) returns enough fields to open an unfinished run (id + label/step) without offering past/redo/delete — `app/channel_api.py`, reuse `app/app_news.py` `list_screen` / `LIST_ACTIONS` / `EXCLUDED_ACTIONS` as needed
+- [x] T005 [P] Add or extend channel API tests for blank topic and list shape in `tests/test_channel_api.py` (and keep `tests/test_app_news_run.py` green)
 
 **Checkpoint**: Foundation ready — Flutter can call start/list/resume/answer safely
 
@@ -49,9 +49,9 @@ description: "Task list for start/resume news review in the app"
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Add `startRun` (POST `/runs` with `topic`, optional Idempotency-Key) on `mobile/lib/channel_client.dart`
-- [ ] T007 [US1] On the post-login list screen in `mobile/lib/main.dart` (or a small dedicated widget file under `mobile/lib/`), add formulation field + start action; show server question/actions; surface blank-topic error without inventing an event
-- [ ] T008 [US1] Refresh the run list after a successful start in `mobile/lib/main.dart` (or the widget introduced in T007)
+- [x] T006 [P] [US1] Add `startRun` (POST `/runs` with `topic`, optional Idempotency-Key) on `mobile/lib/channel_client.dart`
+- [x] T007 [US1] On the post-login list screen in `mobile/lib/main.dart` (or a small dedicated widget file under `mobile/lib/`), add formulation field + start action; show server question/actions; surface blank-topic error without inventing an event
+- [x] T008 [US1] Refresh the run list after a successful start in `mobile/lib/main.dart` (or the widget introduced in T007)
 
 **Checkpoint**: US1 works on device/emulator against `CHANNEL_BASE_URL`
 
@@ -65,11 +65,11 @@ description: "Task list for start/resume news review in the app"
 
 ### Implementation for User Story 2
 
-- [ ] T009 [P] [US2] Add `resumeRun` and `answerRun` (with Idempotency-Key) on `mobile/lib/channel_client.dart`
-- [ ] T010 [US2] Make list items open resume in `mobile/lib/main.dart` (or run screen widget under `mobile/lib/`); show current step/actions from the server
-- [ ] T011 [US2] Add answer field + send on the open-run screen; reuse Idempotency-Key so a repeated delivery does not move the step twice — `mobile/lib/main.dart` / `mobile/lib/channel_client.dart`
-- [ ] T012 [US2] Add explicit back-to-list that leaves the run unfinished (no pause status) and does not offer past/redo/delete — `mobile/lib/main.dart`
-- [ ] T013 [US2] Ensure the open-run screen has no control to start another review (FR-006) in `mobile/lib/main.dart`
+- [x] T009 [P] [US2] Add `resumeRun` and `answerRun` (with Idempotency-Key) on `mobile/lib/channel_client.dart`
+- [x] T010 [US2] Make list items open resume in `mobile/lib/main.dart` (or run screen widget under `mobile/lib/`); show current step/actions from the server
+- [x] T011 [US2] Add answer field + send on the open-run screen; reuse Idempotency-Key so a repeated delivery does not move the step twice — `mobile/lib/main.dart` / `mobile/lib/channel_client.dart`
+- [x] T012 [US2] Add explicit back-to-list that leaves the run unfinished (no pause status) and does not offer past/redo/delete — `mobile/lib/main.dart`
+- [x] T013 [US2] Ensure the open-run screen has no control to start another review (FR-006) in `mobile/lib/main.dart`
 
 **Checkpoint**: US1 and US2 both work from the APK list
 
@@ -77,9 +77,9 @@ description: "Task list for start/resume news review in the app"
 
 ## Phase 5: Polish & Cross-Cutting
 
-- [ ] T014 [P] Run `py -3.12 -m pytest tests/test_app_news_run.py tests/test_channel_api.py`
-- [ ] T015 Rebuild author APK with `CHANNEL_BASE_URL=https://get-business-idea.ru` via `mobile/tool/build_author_apk.ps1` when Flutter changes are ready
-- [ ] T016 Update story status for «Начать разбор новости…» in `features/feature-map.md` (or leave for `/publish`)
+- [x] T014 [P] Run `py -3.12 -m pytest tests/test_app_news_run.py tests/test_channel_api.py`
+- [x] T015 Rebuild author APK with `CHANNEL_BASE_URL=https://get-business-idea.ru` via `mobile/tool/build_author_apk.ps1` when Flutter changes are ready
+- [x] T016 Update story status for «Начать разбор новости…» in `features/feature-map.md` (or leave for `/publish`)
 
 ---
 

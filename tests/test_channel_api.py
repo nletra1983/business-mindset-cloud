@@ -70,6 +70,29 @@ def test_runs_require_session_and_list_own_runs():
         sessions=sessions,
     )
     assert listed["body"]["runs"] == ["ход один"]
+    assert listed["body"]["actions"] == ["new", "resume"]
+    assert "delete" in listed["body"]["excluded"]
+    assert "past" in listed["body"]["excluded"]
+    assert "redo" in listed["body"]["excluded"]
+
+
+def test_blank_topic_does_not_start_run():
+    book = _book()
+    sessions = MemorySessionStore()
+    person = book.add_person(email="a@example.com", runs=[])
+    secret = sessions.issue(person)
+    blank = dispatch(
+        "POST",
+        f"{APP_PREFIX}/runs",
+        {"Authorization": f"Bearer {secret}"},
+        {"topic": "   "},
+        book=book,
+        sessions=sessions,
+    )
+    assert blank["ok"] is False
+    assert blank["status"] == 400
+    assert blank["body"]["error"] == "blank_topic"
+    assert book.runs_of(person) == []
 
 
 def test_idempotent_answer_does_not_move_step_twice():

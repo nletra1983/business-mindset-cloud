@@ -41,6 +41,63 @@ class ChannelClient {
     return _decode(response);
   }
 
+  Future<Map<String, dynamic>> leaveToList(String sessionSecret) async {
+    final response = await _http.post(
+      _uri('/runs/leave'),
+      headers: {'Authorization': 'Bearer $sessionSecret'},
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> startRun(
+    String sessionSecret,
+    String topic, {
+    String? idempotencyKey,
+  }) async {
+    final headers = <String, String>{
+      'Authorization': 'Bearer $sessionSecret',
+      'Content-Type': 'application/json',
+    };
+    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+      headers['Idempotency-Key'] = idempotencyKey;
+    }
+    final response = await _http.post(
+      _uri('/runs'),
+      headers: headers,
+      body: jsonEncode({'topic': topic}),
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> resumeRun(String sessionSecret, String runId) async {
+    final response = await _http.post(
+      _uri('/runs/$runId/resume'),
+      headers: {'Authorization': 'Bearer $sessionSecret'},
+    );
+    return _decode(response);
+  }
+
+  Future<Map<String, dynamic>> answerRun(
+    String sessionSecret,
+    String runId,
+    String text, {
+    String? idempotencyKey,
+  }) async {
+    final headers = <String, String>{
+      'Authorization': 'Bearer $sessionSecret',
+      'Content-Type': 'application/json',
+    };
+    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+      headers['Idempotency-Key'] = idempotencyKey;
+    }
+    final response = await _http.post(
+      _uri('/runs/$runId/answers'),
+      headers: headers,
+      body: jsonEncode({'text': text}),
+    );
+    return _decode(response);
+  }
+
   Future<Map<String, dynamic>> logout(String sessionSecret) async {
     final response = await _http.post(
       _uri('/auth/logout'),
@@ -50,7 +107,9 @@ class ChannelClient {
   }
 
   Map<String, dynamic> _decode(http.Response response) {
-    final body = response.body.isEmpty ? <String, dynamic>{} : jsonDecode(response.body) as Map<String, dynamic>;
+    final body = response.body.isEmpty
+        ? <String, dynamic>{}
+        : jsonDecode(response.body) as Map<String, dynamic>;
     return {'statusCode': response.statusCode, 'body': body};
   }
 }
