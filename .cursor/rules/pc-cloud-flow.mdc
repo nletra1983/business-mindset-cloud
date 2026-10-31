@@ -7,10 +7,10 @@ alwaysApply: true
 
 - Новая фича: `/po-new-feature`, затем `/arch-new-feature`, затем `/po-new-story`. К Spec Kit не переходить, пока есть `NEEDS CLARIFICATION` или открытый `ARH-CHANGE`.
 - Перед Spec Kit: `/check-ready-to-speckit` (штамп + `ready-for-speckit`). `/speckit-specify` сам гоняет проверку, если штампа нет или он протух. Правка границы/`business-logic` сбрасывает готовность в `draft`.
-- Зелёный шаг Spec Kit без вопросов → следующий (plan→tasks→implement), одна история; см. `speckit-auto-advance.md`. «Остановись перед implement» — стоп после tasks.
+- Зелёный шаг Spec Kit без вопросов → следующий только до tasks (specify→plan→tasks), одна история; см. `speckit-auto-advance.md`. **Implement и `/publish` — только по явной команде**, каждый отдельно. Оговорка: «и сразу implement» в том же сообщении.
 - Реестр срезов: `features/feature-map.md`. Перед Spec Kit — актуальная строка и путь к бизнес-постановке.
 - Скрипты Spec Kit: только `.specify/scripts/bash/` (не powershell), если skill не говорит иное.
 - Cloud / телефон: читать только файлы репозитория; не предполагать локальный `D:\` вне git.
 - Дыры в постановке не закрывать молча — спросить пользователя.
-- После specify/plan/tasks/implement предложить обновить статус в `feature-map.md` или сразу `/publish` (карта + коммит + push в `main` + при необходимости APK). Скилл: `.cursor/skills/publish/SKILL.md`.
+- После implement предложить `/publish` (карта + коммит + push в `main` + при необходимости APK), но не запускать его сам. Скилл: `.cursor/skills/publish/SKILL.md`.
 - На сервер Selectel агент не заходит. Бот обновляется сам, когда коммит попадает в `main` (в т.ч. через `/publish`).

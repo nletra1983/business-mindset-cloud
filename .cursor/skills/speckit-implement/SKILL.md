@@ -18,7 +18,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Business Mindset: auto-advance
 
-После успешного implement: если человек задал несколько историй подряд — перейти к следующей через `/speckit-specify` по `.cursor/skills/speckit-auto-advance.md`. Иначе остановиться и кратко сказать, что цепочка этой истории закончена. Две истории в одном implement запрещены.
+`/speckit-implement` запускается **только явно**. После успешного implement — остановиться; предложить отдельно `/publish`, но не запускать его. Если человек в том же сообщении назвал несколько историй на implement — всё равно одна история за раз; следующую implement не начинать без новой команды. Две истории в одном implement запрещены.
 
 ## Pre-Execution Checks
 

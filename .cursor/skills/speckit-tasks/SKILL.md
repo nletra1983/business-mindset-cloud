@@ -18,7 +18,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 ## Business Mindset: auto-advance
 
-После успешных tasks без вопросов человеку — сразу `/speckit-implement` той же спеки по `.cursor/skills/speckit-auto-advance.md`, если человек не написал «остановись перед implement». Не ждать «продолжай», не срезать шаги скилла.
+После успешных tasks без вопросов человеку — **остановиться** по `.cursor/skills/speckit-auto-advance.md`. Не запускать `/speckit-implement` и `/publish`. Кратко сказать, что `tasks.md` готов и что дальше явно: `/speckit-implement`, отдельно `/publish`.
+
+Исключение на один заход: в сообщении есть «и сразу implement» / «без остановки перед implement» — тогда сразу `/speckit-implement` той же спеки. Не срезать шаги скилла.
 
 ## Pre-Execution Checks
 
