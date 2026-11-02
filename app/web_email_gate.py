@@ -8,16 +8,11 @@ from typing import Any
 
 from app.config import ACCESS_MODE, MODEL_REQUESTED, SKILL_VERSION
 from app.entrances import normalize_email
+from app.model_client import ModelDown
 from app.web_day2_mail import enqueue_day2
-from app.web_guest_smoke import _load_state, _window_row
+from app.web_guest_smoke import _load_state, _window_row, ask_skill
 
 EMAIL_STEPS_LIMIT = 3
-
-_STEP_PROMPTS = (
-    "Кто уже платит или теряет из‑за этого сдвига — назовите конкретнее, как думаешь?",
-    "Какую короткую проверку за неделю вы бы сделали, чтобы не строить впустую — как по‑твоему?",
-    "Соберите черновик своими словами: для кого, какая боль, кто платит, какая проверка.",
-)
 
 
 def _guest_messages(conn, session: dict[str, Any]) -> tuple[str, list[dict[str, str]]]:
@@ -176,7 +171,13 @@ def submit_email(conn, session: dict[str, Any], raw_email: str) -> tuple[int, di
 
     person_id = _ensure_person_for_email(conn, email)
     run_id = _create_run_with_transcript(conn, person_id, topic, messages)
-    prompt = _STEP_PROMPTS[0]
+    try:
+        prompt = ask_skill(MODEL_REQUESTED, messages or [{"role": "human", "text": topic}], topic=topic)
+    except ModelDown:
+        return 503, {
+            "error": "model_down",
+            "message": "Модель сейчас недоступна. Попробуйте ещё раз чуть позже.",
+        }
     continued = list(messages) + [{"role": "agent", "text": prompt}]
     _save_continue(
         conn,
@@ -259,14 +260,18 @@ def resume_email(conn, session: dict[str, Any], raw_email: str) -> tuple[int, di
             "agent_reply": "Разбор до оплаты уже пройден. Дальше — экран суммы (следующая история).",
         }
 
-    next_prompt = _STEP_PROMPTS[min(steps_done, len(_STEP_PROMPTS) - 1)]
+    last_agent = ""
+    for item in reversed(transcript):
+        if item.get("role") == "agent" and item.get("text"):
+            last_agent = item["text"]
+            break
     return 200, {
         "ok": True,
         "email": email,
         "resumed": True,
         "email_steps_done": steps_done,
         "email_steps_limit": EMAIL_STEPS_LIMIT,
-        "agent_reply": next_prompt,
+        "agent_reply": last_agent,
         "messages": transcript,
         "code_required": False,
     }
@@ -304,13 +309,13 @@ def post_continue_message(
     transcript.append({"role": "human", "text": answer})
     steps += 1
     payment_gate = steps >= EMAIL_STEPS_LIMIT
-    if payment_gate:
-        agent_reply = (
-            "Черновик принят. Три шага после email готовы — дальше экран с суммой "
-            "(фейковая оплата в следующей истории)."
-        )
-    else:
-        agent_reply = _STEP_PROMPTS[steps]
+    try:
+        agent_reply = ask_skill(MODEL_REQUESTED, transcript)
+    except ModelDown:
+        return 503, {
+            "error": "model_down",
+            "message": "Модель сейчас недоступна. Попробуйте ещё раз чуть позже.",
+        }
     transcript.append({"role": "agent", "text": agent_reply})
 
     with conn.cursor() as cur:

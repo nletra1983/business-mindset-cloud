@@ -11,15 +11,45 @@ from pathlib import Path
 from typing import Any, Callable
 
 from app.config import MODEL_REQUESTED
-from app.deepseek import ModelDown, finale, judge_block
 from app.get_news_backlog import BACKLOG
-from app.skill import blank_topic, event_prompt, scale_prompt
+from app.model_client import ModelDown, complete
+from app.skill import blank_topic, load_text
 from app import smartcaptcha
 from app.web_landing import WINDOWS_LIMIT, moscow_today
 
 VerifyFn = Callable[[str | None, str | None], bool]
 
 _ITEM_RE = re.compile(r"^\d+\.\s+(.+)$")
+
+
+def skill_system_prompt(topic: str = "") -> str:
+    """The product skill file is the model prompt. Python only carries the turn."""
+    body = load_text()
+    extra = f"\n\nФакт этого хода, его нельзя подменять:\n{topic}" if topic else ""
+    return (
+        "Веди диалог строго по скиллу ниже. "
+        "Человеку пиши только то, что скилл разрешает написать в чат. "
+        "Один вопрос за ответ. "
+        "Если новость не проходит ни один вопрос таблицы, ответь ровно одним словом: SKIP"
+        f"{extra}\n\n{body}"
+    )
+
+
+def ask_skill(model_id: str, dialogue: list[dict[str, str]], *, topic: str = "") -> str:
+    messages: list[dict[str, str]] = [{"role": "system", "content": skill_system_prompt(topic)}]
+    for item in dialogue:
+        text = (item.get("text") or "").strip()
+        if not text:
+            continue
+        role = "assistant" if item.get("role") == "agent" else "user"
+        messages.append({"role": role, "content": text})
+    if len(messages) == 1:
+        raise ModelDown
+    text, _returned = complete(model_id, messages)
+    reply = (text or "").strip()
+    if not reply:
+        raise ModelDown
+    return reply
 
 
 def pick_news_fact(backlog_path: Path | None = None) -> str | None:
@@ -127,7 +157,7 @@ def start_window(
     fact: str | None = None,
     use_news: bool = True,
 ) -> tuple[int, dict[str, Any]]:
-    """Create guest window under daily limit; attach news or own fact; first question without model."""
+    """Create guest window under daily limit. Opening line comes from the skill prompt."""
     used = int(session.get("windows_used_today") or 0)
     if used >= WINDOWS_LIMIT:
         return 403, {
@@ -164,7 +194,23 @@ def start_window(
 
     window_id = str(uuid.uuid4())
     state = _empty_state(topic)
-    question = event_prompt(topic)
+    state["phase"] = "skill"
+    try:
+        question = ask_skill(
+            MODEL_REQUESTED,
+            [{"role": "human", "text": f"Новость для начала хода:\n{topic}"}],
+            topic=topic,
+        )
+    except ModelDown:
+        return 503, {
+            "error": "model_down",
+            "message": "Модель сейчас недоступна. Попробуйте ещё раз чуть позже.",
+        }
+    if question.strip().upper() == "SKIP":
+        return 400, {
+            "error": "fact_rejected",
+            "message": "По этому факту вопрос не получается. Сформулируйте другой факт своими словами.",
+        }
     _append(state, "agent", question)
     today = moscow_today()
     with conn.cursor() as cur:
@@ -273,45 +319,11 @@ def post_message(
     mid = model_id or MODEL_REQUESTED
     _append(state, "human", answer)
     touch_first = row["first_reply_at"] is None
-    agent_reply = ""
     gate_required = False
+    state["phase"] = "skill"
 
     try:
-        if state["phase"] == "event":
-            ok, missing, _returned = judge_block("event", state["topic"], answer, mid)
-            if not ok:
-                agent_reply = f"{missing}\n{event_prompt(state['topic'])}"
-            else:
-                state["event_answer"] = answer
-                state["phase"] = "scale"
-                agent_reply = scale_prompt(state["topic"])
-        elif state["phase"] == "scale":
-            ok, missing, _returned = judge_block("scale", state["topic"], answer, mid)
-            if not ok:
-                agent_reply = f"{missing}\n{scale_prompt(state['topic'])}"
-            else:
-                state["scale_answer"] = answer
-                state["phase"] = "closing"
-                agent_reply = (
-                    f"По «{state['topic']}» уже есть сдвиг и группы. "
-                    "Какую короткую проверку за неделю вы бы сделали — как думаешь?"
-                )
-        elif state["phase"] == "closing":
-            state["phase"] = "done"
-            _spoken, worked, weak, missed, _ret = finale(
-                state["topic"],
-                state["event_answer"] or answer,
-                state["scale_answer"] or answer,
-                mid,
-            )
-            agent_reply = f"ПОЛУЧИЛОСЬ: {worked}\n\nСЛАБО: {weak}\n\nПРОПУЩЕНО: {missed}"
-        else:
-            return 403, {
-                "error": "gate_required",
-                "message": "Разбор в этом окне завершён. Дальше — email-гейт.",
-                "gate_required": True,
-                "step_count": step_count,
-            }
+        agent_reply = ask_skill(mid, state["messages"], topic=state.get("topic") or "")
     except ModelDown:
         return 503, {
             "error": "model_down",
@@ -320,7 +332,7 @@ def post_message(
 
     _append(state, "agent", agent_reply)
     step_count += 1
-    if step_count >= 3 or state["phase"] == "done":
+    if step_count >= 3:
         gate_required = True
         state["gate_shown"] = True
         with conn.cursor() as cur:

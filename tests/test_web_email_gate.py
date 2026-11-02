@@ -1,7 +1,10 @@
 import json
 from datetime import date
 
+import pytest
+
 from app import web_email_gate
+from app import web_guest_smoke
 from app.channel_api import APP_PREFIX, dispatch
 from app.entrances import MemoryBook, begin_email_login, confirm_email_login
 from app.mail import mail_text
@@ -158,6 +161,15 @@ class FakeConn:
 
     def cursor(self):
         return _Cur(self.store)
+
+
+@pytest.fixture(autouse=True)
+def _skill_prompt(monkeypatch):
+    def fake(model_id, messages):
+        assert "business-idea-from-news.smoke" in messages[0]["content"]
+        return ("Следующий вопрос по скиллу, как по-твоему?", model_id)
+
+    monkeypatch.setattr(web_guest_smoke, "complete", fake)
 
 
 def _session(conn, wid=None):

@@ -1,6 +1,8 @@
 import json
 from datetime import date
 
+import pytest
+
 from app import smartcaptcha, web_guest_smoke
 from app.get_news_backlog import BACKLOG
 from app.web_landing import WINDOWS_LIMIT
@@ -96,6 +98,16 @@ class FakeConn:
         return _Cur(self.store)
 
 
+@pytest.fixture(autouse=True)
+def _skill_prompt(monkeypatch):
+    def fake(model_id, messages):
+        assert messages[0]["role"] == "system"
+        assert "business-idea-from-news.smoke" in messages[0]["content"]
+        return ("Вопрос по этой новости, как думаешь?", model_id)
+
+    monkeypatch.setattr(web_guest_smoke, "complete", fake)
+
+
 def _session(conn, used=0):
     sid = "11111111-1111-1111-1111-111111111111"
     sess = {
@@ -159,7 +171,7 @@ def test_message_without_captcha_does_not_call_model(monkeypatch):
         called["n"] += 1
         raise AssertionError("model must not run")
 
-    monkeypatch.setattr(web_guest_smoke, "judge_block", boom)
+    monkeypatch.setattr(web_guest_smoke, "complete", boom)
     status, body = web_guest_smoke.post_message(
         conn,
         sess,
@@ -181,15 +193,6 @@ def test_three_steps_then_gate(monkeypatch):
         fact="Розничная цена бензина снижалась несколько недель подряд",
         use_news=False,
     )
-
-    def judge(block, topic, answer, model_id):
-        return True, "", model_id
-
-    def fake_finale(topic, event_answer, scale_answer, model_id):
-        return "raw", "есть сдвиг цены", "мало групп", "дальше были бы потери", model_id
-
-    monkeypatch.setattr(web_guest_smoke, "judge_block", judge)
-    monkeypatch.setattr(web_guest_smoke, "finale", fake_finale)
 
     s1, b1 = web_guest_smoke.post_message(
         conn,
@@ -223,7 +226,7 @@ def test_three_steps_then_gate(monkeypatch):
     assert s3 == 200
     assert b3["gate_required"] is True
     assert b3["step_count"] == 3
-    assert "ПОЛУЧИЛОСЬ" in b3["agent_reply"]
+    assert "как думаешь?" in b3["agent_reply"]
 
     status, body = web_guest_smoke.post_message(
         conn,
