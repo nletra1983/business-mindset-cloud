@@ -6,6 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app ./app
-COPY features/business-idea-from-news/FeatureArtifacts/business-idea-from-news.smoke.md ./features/business-idea-from-news/FeatureArtifacts/business-idea-from-news.smoke.md
+COPY web ./web
+COPY features/business-idea-from-news/FeatureArtifacts/ ./features/business-idea-from-news/FeatureArtifacts/
 
 CMD ["python", "-m", "app.main"]
