@@ -19,9 +19,11 @@ services:
       - ./secrets/zai.env
       - ./secrets/postgres.env
       - ./secrets/mail.env
+      - ./secrets/smartcaptcha.env
     environment:
       POSTGRES_HOST: db
       CHANNEL_HTTP_PORT: "8080"
+      YANDEX_METRIKA_COUNTER_ID: ${YANDEX_METRIKA_COUNTER_ID:-}
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:

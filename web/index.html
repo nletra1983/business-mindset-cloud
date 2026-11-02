@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Get Business Idea — тренажёр мышления</title>
+  <link rel="stylesheet" href="/web/styles.css" />
+</head>
+<body>
+  <main id="hero" class="section hero">
+    <p class="brand">Get Business Idea</p>
+    <h1>Научитесь видеть бизнес-идеи там, где другие видят просто новости</h1>
+    <p class="lead">Несколько минут в день — факты, вопросы предпринимателя, ваша мысль. Без регистрации для первых шагов.</p>
+    <p><a class="cta" href="#demo">Попробовать первые шаги — без регистрации</a></p>
+  </main>
+
+  <section id="demo" class="section demo">
+    <h2>Тренажёр</h2>
+    <p class="muted">Три шага без регистрации. Новость из бэклога или свой факт.</p>
+    <div id="demo-thread" class="thread" aria-live="polite"></div>
+    <p id="demo-wait" class="wait hidden" role="status">Думаю над ответом…</p>
+    <div id="demo-gate" class="gate hidden">
+      <p><strong>Три шага готовы.</strong> Введите email — продолжим сразу, без кода из письма.</p>
+      <form id="email-gate-form" class="email-gate-form">
+        <label class="sr-only" for="email-input">Email</label>
+        <input id="email-input" type="email" autocomplete="email" placeholder="you@example.com" required />
+        <button type="submit" class="btn">Продолжить без кода</button>
+        <button type="button" id="email-resume" class="btn ghost">У меня уже был email</button>
+      </form>
+    </div>
+    <div id="demo-pay-gate" class="gate hidden">
+      <p id="paywall-copy"></p>
+      <form id="paywall-form" class="paywall-form">
+        <label for="pay-amount">Сумма, ₽</label>
+        <input id="pay-amount" type="number" min="1" step="1" value="100" required />
+        <button type="submit" class="btn">Оплатить</button>
+      </form>
+      <p id="paywall-confirm" class="muted hidden" role="status"></p>
+    </div>
+    <form id="demo-form" class="demo-form">
+      <label class="sr-only" for="demo-input">Ваш ответ или факт</label>
+      <textarea id="demo-input" rows="3" placeholder="Свой факт или ответ на вопрос…" required></textarea>
+      <div id="captcha-box" class="captcha-box"></div>
+      <div class="demo-actions">
+        <button type="button" id="demo-start-news" class="btn secondary">Новость из бэклога</button>
+        <button type="submit" id="demo-send" class="btn">Отправить</button>
+        <button type="button" id="demo-clear" class="btn ghost">Очистить</button>
+      </div>
+      <p id="demo-error" class="error hidden" role="alert"></p>
+    </form>
+  </section>
+
+  <section id="how" class="section">
+    <h2>Как это работает</h2>
+    <ol class="steps">
+      <li>Берёте факт или новость из бэклога (или свой).</li>
+      <li>Отвечаете на один вопрос за шаг — думаете сами.</li>
+      <li>Получаете обратную связь по структуре мышления, не готовую «идею за вас».</li>
+    </ol>
+  </section>
+
+  <section id="not-chatgpt" class="section">
+    <h2>Это не «просто ChatGPT»</h2>
+    <p>Нет генератора идей «на кнопку». Есть рамка предпринимательского вопроса, проверка слабого ответа и ваш собственный ход мысли. Модель помогает держать структуру — решение остаётся за вами.</p>
+  </section>
+
+  <section id="outcomes" class="section">
+    <h2>Что получаете</h2>
+    <ul>
+      <li>Привычку смотреть на новости глазами предпринимателя.</li>
+      <li>Короткие ежедневные шаги без перегрузки.</li>
+      <li>Сохранение хода, когда решите оставить email.</li>
+    </ul>
+  </section>
+
+  <section id="levels" class="section">
+    <h2>Три уровня доступа</h2>
+    <ul class="levels-list">
+      <li><strong>Гость</strong> — первые 3 шага без регистрации.</li>
+      <li><strong>Email</strong> — ещё 3 шага того же разбора, без ожидания кода на странице.</li>
+      <li><strong>Оплата</strong> — поле суммы на ваш выбор; ориентир по умолчанию <strong>100&nbsp;₽</strong> (реальная оплата — позже).</li>
+    </ul>
+  </section>
+
+  <section id="example" class="section">
+    <h2>Живой пример</h2>
+    <p>Пример формата: новость → вопрос «где здесь возможность для кого?» → ваш ответ → уточнение, если ответ слишком общий. Без чужих отзывов и чужих логотипов: только честный ход разбора.</p>
+  </section>
+
+  <section id="audience" class="section">
+    <h2>Для кого</h2>
+    <p>Для тех, кто интересуется своим делом или хочет предпринимательское мышление в работе — и уже пробовал ИИ, но хочет не «идею с потолка», а навык.</p>
+  </section>
+
+  <section id="author" class="section">
+    <h2>Об авторе</h2>
+    <p class="muted">Место под материалы автора. Текст появится позже — без выдуманных регалий.</p>
+  </section>
+
+  <section id="faq" class="section">
+    <h2>Вопросы</h2>
+    <dl class="faq">
+      <dt>Нужна ли регистрация сразу?</dt>
+      <dd>Нет. Сначала три шага гостем. Email — только если захотите продолжить.</dd>
+      <dt>Это обучение или консультация?</dt>
+      <dd>Образовательный тренажёр мышления. Не финансовый совет и не гарантия дохода.</dd>
+    </dl>
+    <p class="disclaimer">Материалы носят образовательный характер. Решения и риски — на вас.</p>
+  </section>
+
+  <section id="final-cta" class="section final-cta">
+    <h2>Готовы попробовать?</h2>
+    <p>Три коротких шага — прямо на этой странице.</p>
+    <p><a class="cta" href="#demo">К тренажёру</a></p>
+  </section>
+
+  <script>
+    window.YANDEX_METRIKA_COUNTER_ID = window.YANDEX_METRIKA_COUNTER_ID || "";
+    window.SMARTCAPTCHA_CLIENT_KEY = window.SMARTCAPTCHA_CLIENT_KEY || "";
+  </script>
+  <script src="/web/metrika.js" defer></script>
+  <script src="https://smartcaptcha.yandexcloud.net/captcha.js" defer></script>
+  <script src="/web/demo.js" defer></script>
+</body>
+</html>

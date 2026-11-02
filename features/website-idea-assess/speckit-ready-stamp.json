@@ -1,0 +1,45 @@
+{
+  "checked_at": "2026-11-02T21:15:00+03:00",
+  "feature_files": {
+    "business-logic.md": "839b42806d11285cd4f1fcd2732d4735896e74504fb020d51e5e7dd5d72c5903",
+    "arch-change.md": "431acbdbada0efde579c7c3bca78141bb1179946ce791669d7dd2d56850a7879"
+  },
+  "stories": [
+    {
+      "no": 1,
+      "title": "Лендинг: hero и блоки страницы",
+      "boundary": "features/website-idea-assess/landing-page.md",
+      "sha256": "bd33460b21f0f210f233350c58a81b68735d15adf3213a0556db1e9072caa554"
+    },
+    {
+      "no": 2,
+      "title": "Гостевой тренажёр: 3 шага smoke",
+      "boundary": "features/website-idea-assess/guest-smoke-run.md",
+      "sha256": "fe44083ba1d1c409a7e60731e8a9d4a4cb309c7371fc7ac92dc6eff176329099"
+    },
+    {
+      "no": 3,
+      "title": "Гейт email без кода и ещё 3 шага",
+      "boundary": "features/website-idea-assess/email-continue.md",
+      "sha256": "bbde6beb67a7d89003c733bac586e80ef2b7f3ff119460c9f812dff374f38051"
+    },
+    {
+      "no": 4,
+      "title": "Письмо дня 2",
+      "boundary": "features/website-idea-assess/day2-email.md",
+      "sha256": "bac5598b1838a1ee04c551c9f138320be8283011d8e342db6c9b5c6230275b2a"
+    },
+    {
+      "no": 5,
+      "title": "Фейковая оплата с полем суммы",
+      "boundary": "features/website-idea-assess/fake-payment.md",
+      "sha256": "9d0d16b6776c1c078c96d08c9ec57eb8263766189ba2f1d86b31f7ae346e1751"
+    },
+    {
+      "no": 6,
+      "title": "Метрика и события воронки",
+      "boundary": "features/website-idea-assess/metrika-funnel.md",
+      "sha256": "794dcb18cd419720aab0d0c9fa914ee6f38c8045ffd28e1353448a571208ac58"
+    }
+  ]
+}

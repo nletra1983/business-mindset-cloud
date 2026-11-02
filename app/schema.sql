@@ -211,3 +211,63 @@ CREATE TABLE IF NOT EXISTS processed_app_operation (
     created_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (person_id, operation_key)
 );
+
+CREATE TABLE IF NOT EXISTS guest_session (
+    id uuid PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    windows_day date NOT NULL DEFAULT (timezone('Europe/Moscow', now())::date),
+    windows_used_today integer NOT NULL DEFAULT 0,
+    current_window_id uuid NULL,
+    person_id uuid NULL REFERENCES person (id)
+);
+
+ALTER TABLE guest_session ADD COLUMN IF NOT EXISTS last_email text;
+ALTER TABLE guest_session ADD COLUMN IF NOT EXISTS continue_run_id uuid;
+ALTER TABLE guest_session ADD COLUMN IF NOT EXISTS email_steps_done integer NOT NULL DEFAULT 0;
+ALTER TABLE guest_session ADD COLUMN IF NOT EXISTS continue_transcript jsonb NOT NULL DEFAULT '[]'::jsonb;
+
+CREATE TABLE IF NOT EXISTS guest_window (
+    id uuid PRIMARY KEY,
+    guest_session_id uuid NOT NULL REFERENCES guest_session (id) ON DELETE CASCADE,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    first_reply_at timestamptz NULL,
+    transcript jsonb NOT NULL DEFAULT '[]'::jsonb,
+    cleared_client_at timestamptz NULL,
+    closed_at timestamptz NULL,
+    step_count integer NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS guest_window_session_idx ON guest_window (guest_session_id);
+CREATE INDEX IF NOT EXISTS guest_window_ttl_idx ON guest_window (first_reply_at);
+
+CREATE TABLE IF NOT EXISTS day2_mail (
+    id uuid PRIMARY KEY,
+    email text NOT NULL,
+    person_id uuid NULL REFERENCES person (id),
+    run_id uuid NULL,
+    due_at timestamptz NOT NULL,
+    sent_at timestamptz NULL,
+    status text NOT NULL DEFAULT 'pending',
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT day2_mail_status_check CHECK (status IN ('pending', 'sent', 'failed'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS day2_mail_email_pending_uidx
+    ON day2_mail (email)
+    WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS day2_mail_due_idx ON day2_mail (due_at)
+    WHERE status = 'pending';
+
+CREATE TABLE IF NOT EXISTS fake_payment_intent (
+    id uuid PRIMARY KEY,
+    person_id uuid NULL REFERENCES person (id),
+    email text NULL,
+    amount_rub numeric(12, 2) NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS fake_payment_intent_person_idx
+    ON fake_payment_intent (person_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS fake_payment_intent_email_idx
+    ON fake_payment_intent (email, created_at DESC);

@@ -1,0 +1,177 @@
+:root {
+  --ink: #1a1a1a;
+  --muted: #5a5a5a;
+  --bg: #f7f4ef;
+  --panel: #fffdf9;
+  --accent: #0b5fff;
+  --line: #e4ddd2;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse 80% 40% at 10% 0%, #efe6d8 0%, transparent 55%),
+    linear-gradient(180deg, #faf7f2 0%, var(--bg) 40%, #f3efe8 100%);
+  line-height: 1.45;
+}
+.section {
+  padding: 1.75rem 1.25rem;
+  max-width: 40rem;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--line);
+}
+.section:last-of-type { border-bottom: none; }
+.brand {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.hero h1 {
+  font-size: 1.55rem;
+  margin: 0 0 0.75rem;
+  line-height: 1.25;
+}
+.lead { margin: 0 0 0.5rem; color: var(--ink); }
+.cta {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 0.35rem;
+  font-weight: 600;
+}
+.demo {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  margin: 1rem 1.25rem;
+  max-width: calc(40rem - 0px);
+}
+@media (min-width: 42.5rem) {
+  .demo { margin-left: auto; margin-right: auto; }
+}
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+.thread {
+  min-height: 4rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  margin: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.bubble {
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.4rem;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+}
+.bubble.agent { background: #eef3ff; align-self: flex-start; }
+.bubble.human { background: #e8f6ea; align-self: flex-end; }
+.wait { color: var(--muted); font-style: italic; }
+.gate {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px dashed var(--line);
+  background: #fff;
+}
+.demo-form textarea {
+  width: 100%;
+  font: inherit;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  resize: vertical;
+}
+.demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+.btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+.btn.secondary { background: #2f3a4a; }
+.btn.ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+.btn:disabled { opacity: 0.55; cursor: wait; }
+.error { color: #a11; margin-top: 0.5rem; }
+.captcha-box { margin-top: 0.65rem; min-height: 1.5rem; }
+.email-gate-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+.email-gate-form input[type="email"] {
+  flex: 1 1 12rem;
+  font: inherit;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+}
+.paywall-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.paywall-form input[type="number"] {
+  width: 7rem;
+  font: inherit;
+  padding: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+}
+.steps, .levels-list, .section ul {
+  padding-left: 1.2rem;
+  margin: 0.5rem 0 0;
+}
+.steps li, .levels-list li, .section ul li { margin: 0.4rem 0; }
+.faq dt { font-weight: 600; margin-top: 0.85rem; }
+.faq dd { margin: 0.25rem 0 0; color: var(--muted); }
+.disclaimer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.final-cta { text-align: left; }
+h2 { font-size: 1.25rem; margin: 0 0 0.65rem; }
+@media (min-width: 720px) {
+  .hero h1 { font-size: 2rem; }
+  h2 { font-size: 1.4rem; }
+}
+/* Phone-first check: content readable near 375px without horizontal scroll */
+@media (max-width: 400px) {
+  .section { padding-left: 1rem; padding-right: 1rem; }
+  .hero h1 { font-size: 1.4rem; }
+}

@@ -75,3 +75,19 @@
 | 8 | Открыть настройки того же входа: модель и информация о себе | `specs/011-app-settings/` | done |
 | 9 | Войти по номеру телефона и коду из SMS | `specs/006-phone-account-entry/` | parked |
 | 10 | Научить скилл объединять текст профиля при слиянии | — | parked |
+
+## Главная сайта: лендинг-тренажёр (веб)
+
+Папка: `features/website-idea-assess/`  
+Бизнес-логика: `features/website-idea-assess/business-logic.md`  
+Статус фичи: `done`. **ADL-023** принят. Истории №0–№6 — `done` (опубликовано в `main`).
+
+| № | История | Спека / граница | Статус |
+|---|---|---|---|
+| 0 | Внедрить веб-канал лендинга на Selectel | `specs/015-web-landing-channel/` | done |
+| 1 | Лендинг: hero и блоки страницы | `specs/016-landing-page-blocks/` | done |
+| 2 | Гостевой тренажёр: 3 шага smoke | `specs/017-guest-smoke-run/` | done |
+| 3 | Гейт email без кода и ещё 3 шага | `specs/018-email-continue-gate/` | done |
+| 4 | Письмо дня 2 | `specs/019-day2-return-email/` | done |
+| 5 | Фейковая оплата с полем суммы | `specs/020-fake-payment-amount/` | done |
+| 6 | Метрика и события воронки | `specs/021-metrika-funnel-events/` | done |
